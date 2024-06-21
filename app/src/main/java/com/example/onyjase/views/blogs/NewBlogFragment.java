@@ -9,6 +9,8 @@ import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,6 +68,13 @@ public class NewBlogFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
 
         // cancel button
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearInputs();
+                loadFragment(new BlogsFeedFragment());
+            }
+        });
 
         // post button
 
@@ -84,6 +93,14 @@ public class NewBlogFragment extends Fragment {
                 pickImage();
             }
         });
+    }
+
+    // clear all inputs
+    private void clearInputs() {
+        titleInput.setText("");
+        contentInput.setText("");
+        curImage = null;
+        selectImgBox.setImageResource(R.drawable.blue_rectangle_border);
     }
 
     // picking image
@@ -110,4 +127,11 @@ public class NewBlogFragment extends Fragment {
                 }
             }
             );
+
+    private void loadFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.commit();
+    }
 }
