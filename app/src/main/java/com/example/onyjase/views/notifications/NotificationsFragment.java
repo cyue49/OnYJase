@@ -9,9 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.onyjase.R;
+import com.example.onyjase.databinding.FragmentNotificationsBinding;
 
 // Fragment for page displaying notifications
 public class NotificationsFragment extends Fragment {
+    FragmentNotificationsBinding binding;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,7 +23,7 @@ public class NotificationsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_notifications, container, false);
+        binding = FragmentNotificationsBinding.inflate(inflater,container,false);
+        return binding.getRoot();
     }
 }

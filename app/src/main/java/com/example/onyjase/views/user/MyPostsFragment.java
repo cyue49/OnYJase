@@ -9,9 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.onyjase.R;
+import com.example.onyjase.databinding.FragmentMyPostsBinding;
 
 // Fragment for the My Posts section in user profile
 public class MyPostsFragment extends Fragment {
+    FragmentMyPostsBinding binding;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,7 +23,7 @@ public class MyPostsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_my_posts, container, false);
+        binding = FragmentMyPostsBinding.inflate(inflater,container,false);
+        return binding.getRoot();
     }
 }

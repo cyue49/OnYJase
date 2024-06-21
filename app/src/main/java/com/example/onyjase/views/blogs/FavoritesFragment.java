@@ -9,9 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.onyjase.R;
+import com.example.onyjase.databinding.FragmentFavoritesBinding;
 
 // Fragment for the favorites section of the home feed for blogs
 public class FavoritesFragment extends Fragment {
+    FragmentFavoritesBinding binding;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,7 +23,7 @@ public class FavoritesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_favorites, container, false);
+        binding = FragmentFavoritesBinding.inflate(inflater,container,false);
+        return binding.getRoot();
     }
 }

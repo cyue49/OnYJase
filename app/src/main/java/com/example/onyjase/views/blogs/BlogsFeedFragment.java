@@ -9,9 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.onyjase.R;
+import com.example.onyjase.databinding.FragmentBlogsFeedBinding;
 
 // Fragment for the home feed for blogs
 public class BlogsFeedFragment extends Fragment {
+    FragmentBlogsFeedBinding binding;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,7 +23,7 @@ public class BlogsFeedFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_blogs_feed, container, false);
+        binding = FragmentBlogsFeedBinding.inflate(inflater,container,false);
+        return binding.getRoot();
     }
 }

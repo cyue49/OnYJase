@@ -9,9 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.onyjase.R;
+import com.example.onyjase.databinding.FragmentNewBlogBinding;
 
 // Fragment for the page for creating a new blog
 public class NewBlogFragment extends Fragment {
+    FragmentNewBlogBinding binding;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,7 +23,7 @@ public class NewBlogFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_new_blog, container, false);
+        binding = FragmentNewBlogBinding.inflate(inflater,container,false);
+        return binding.getRoot();
     }
 }
