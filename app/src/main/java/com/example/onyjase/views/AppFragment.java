@@ -1,5 +1,6 @@
 package com.example.onyjase.views;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -39,38 +40,37 @@ public class AppFragment extends Fragment {
         return binding.getRoot();
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         loadFragment(new BlogsFeedFragment());
 
         bottomNav = binding.bottomNav;
-        bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-//                switch (menuItem.getItemId()){
-//                    case R.id.home:
-//                        loadFragment(new BlogsFeedFragment());
-//                        return true;
-//
-//                    case R.id.info:
-//                        loadFragment(new PostsFeedFragment());
-//                        return true;
-//
-//                    case R.id.add:
-//                        loadFragment(new NewBlogFragment());
-//                        return true;
-//
-//                    case R.id.notification:
-//                        loadFragment(new NotificationsFragment());
-//                        return true;
-//
-//                    case R.id.profile:
-//                        loadFragment(new UserProfileFragment());
-//                        return true;
-//                }
-                return false;
+
+        bottomNav.setOnItemSelectedListener(item -> {
+            switch(item.getItemId()) {
+                case R.id.home:
+                    loadFragment(new BlogsFeedFragment());
+                    break;
+
+                case R.id.info:
+                    loadFragment(new PostsFeedFragment());
+                    break;
+
+                case R.id.add:
+                    loadFragment(new NewBlogFragment());
+                    break;
+
+                case R.id.notification:
+                    loadFragment(new NotificationsFragment());
+                    break;
+
+                case R.id.profile:
+                    loadFragment(new UserProfileFragment());
+                    break;
             }
+            return true;
         });
     }
 
