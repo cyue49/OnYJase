@@ -1,21 +1,24 @@
 package com.example.onyjase.models;
 
+import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.Date;
+
 public class Blog {
     private String blogID;
     private String userID;
     private String title;
     private String content;
     private String imageURL;
-    private long timestamp;
+    private @ServerTimestamp Date timestamp;
 
     // constructor
-    public Blog(String blogID, String userID, String title, String content, String imageURL, long timestamp) {
+    public Blog(String blogID, String userID, String title, String content, String imageURL) {
         this.blogID = blogID;
         this.userID = userID;
         this.title = title;
         this.content = content;
         this.imageURL = imageURL;
-        this.timestamp = timestamp;
     }
 
     // getters
@@ -39,10 +42,6 @@ public class Blog {
         return imageURL;
     }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
-
     // setters
     public void setBlogID(String blogID) {
         this.blogID = blogID;
@@ -62,9 +61,5 @@ public class Blog {
 
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 }

@@ -1,5 +1,9 @@
 package com.example.onyjase.models;
 
+import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.Date;
+
 public class Post {
     private String postID;
     private String userID;
@@ -7,16 +11,15 @@ public class Post {
     private String content;
     private String tag;
     private String imageURL;
-    private long timestamp;
+    private @ServerTimestamp Date timestamp;
 
-    public Post(String postID, String userID, String title, String content, String tag, String imageURL, long timestamp) {
+    public Post(String postID, String userID, String title, String content, String tag, String imageURL) {
         this.postID = postID;
         this.userID = userID;
         this.title = title;
         this.content = content;
         this.tag = tag;
         this.imageURL = imageURL;
-        this.timestamp = timestamp;
     }
 
     // getters
@@ -44,10 +47,6 @@ public class Post {
         return imageURL;
     }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
-
     // setters
     public void setPostID(String postID) {
         this.postID = postID;
@@ -71,9 +70,5 @@ public class Post {
 
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 }
