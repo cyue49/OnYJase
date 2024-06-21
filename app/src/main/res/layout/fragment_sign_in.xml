@@ -13,10 +13,16 @@
         android:text="sign in page" />
 
     <Button
-        android:id="@+id/signInBtn"
+        android:id="@+id/tempUserSignInBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sign in" />
+        android:text="Sign in as user" />
+
+    <Button
+        android:id="@+id/tempAdminSignInBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign in as admin" />
 
     <Button
         android:id="@+id/toSignUpBtn"
