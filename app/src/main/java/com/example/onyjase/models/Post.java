@@ -5,14 +5,16 @@ public class Post {
     private String userID;
     private String title;
     private String content;
+    private String tag;
     private String imageURL;
     private long timestamp;
 
-    public Post(String postID, String userID, String title, String content, String imageURL, long timestamp) {
+    public Post(String postID, String userID, String title, String content, String tag, String imageURL, long timestamp) {
         this.postID = postID;
         this.userID = userID;
         this.title = title;
         this.content = content;
+        this.tag = tag;
         this.imageURL = imageURL;
         this.timestamp = timestamp;
     }
@@ -32,6 +34,10 @@ public class Post {
 
     public String getContent() {
         return content;
+    }
+
+    public String getTag() {
+        return tag;
     }
 
     public String getImageURL() {
@@ -57,6 +63,10 @@ public class Post {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public void setImageURL(String imageURL) {
