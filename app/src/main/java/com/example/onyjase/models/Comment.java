@@ -65,4 +65,8 @@ public class Comment {
     public void setStickerURL(String stickerURL) {
         this.stickerURL = stickerURL;
     }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
 }

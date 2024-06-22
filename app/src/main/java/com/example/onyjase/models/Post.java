@@ -75,4 +75,8 @@ public class Post {
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
     }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
 }
