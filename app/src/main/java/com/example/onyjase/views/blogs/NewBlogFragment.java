@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentNewBlogBinding;
 import com.example.onyjase.models.Blog;
 import com.example.onyjase.utils.ImageHelper;
+import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
@@ -58,6 +60,9 @@ public class NewBlogFragment extends Fragment {
     // firebase storage
     FirebaseStorage storage;
 
+    // view model
+    AppViewModel viewModel;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,13 +89,18 @@ public class NewBlogFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
+        viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         // cancel button
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 clearInputs();
-                loadFragment(new BlogsFeedFragment());
+                if (viewModel.getUser().getValue().getRole().equals("admin")){
+                    loadFragment(new WriteNewFragment());
+                } else {
+                    loadFragment(new BlogsFeedFragment());
+                }
             }
         });
 
