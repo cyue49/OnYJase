@@ -41,6 +41,10 @@ public class Comment {
         return stickerURL;
     }
 
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
     // setters
     public void setCommentID(String commentID) {
         this.commentID = commentID;

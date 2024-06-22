@@ -47,6 +47,10 @@ public class Post {
         return imageURL;
     }
 
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
     // setters
     public void setPostID(String postID) {
         this.postID = postID;
