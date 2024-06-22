@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- App colors -->
+    <color name="mainBlue">#113180</color>
+    <color name="subBlue">#396196</color>
+    <color name="grayBtn">#D9D9D9</color>
 </resources>

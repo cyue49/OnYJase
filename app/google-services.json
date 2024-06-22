@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "745774473190",
+    "project_id": "onyjase",
+    "storage_bucket": "onyjase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:745774473190:android:38e6d6403666734c298027",
+        "android_client_info": {
+          "package_name": "com.example.onyjase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDipK7_cJzT_UknZ5O726aeWOeSrm5t1iA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
