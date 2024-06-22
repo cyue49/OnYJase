@@ -1,14 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:ignore="HardcodedText"
     tools:context=".views.blogs.WriteNewFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Choose new blog or new admin post page" />
 
-</FrameLayout>
+    <ImageView
+        android:id="@+id/newBlogBtn"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginVertical="30dp"
+        android:src="@drawable/blue_rectangle"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toTopOf="@+id/newPostBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.6"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/newPostBtn"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginBottom="30dp"
+        android:src="@drawable/blue_rectangle"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/newBlogBtn" />
+
+    <TextView
+        android:id="@+id/newBlogTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Blog"
+        android:textColor="@color/white"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/newBlogBtn"
+        app:layout_constraintEnd_toEndOf="@+id/newBlogBtn"
+        app:layout_constraintStart_toStartOf="@+id/newBlogBtn"
+        app:layout_constraintTop_toTopOf="@+id/newBlogBtn" />
+
+    <TextView
+        android:id="@+id/newPostTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Admin Post"
+        android:textColor="@color/white"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/newPostBtn"
+        app:layout_constraintEnd_toEndOf="@+id/newPostBtn"
+        app:layout_constraintStart_toStartOf="@+id/newPostBtn"
+        app:layout_constraintTop_toTopOf="@+id/newPostBtn" />
+</androidx.constraintlayout.widget.ConstraintLayout>
