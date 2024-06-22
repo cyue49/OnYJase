@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -15,8 +16,10 @@ import android.view.ViewGroup;
 
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentAppBinding;
+import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogsFeedFragment;
 import com.example.onyjase.views.blogs.NewBlogFragment;
+import com.example.onyjase.views.blogs.WriteNewFragment;
 import com.example.onyjase.views.notifications.NotificationsFragment;
 import com.example.onyjase.views.posts.PostsFeedFragment;
 import com.example.onyjase.views.user.UserProfileFragment;
@@ -27,6 +30,8 @@ import com.google.android.material.navigation.NavigationBarView;
 public class AppFragment extends Fragment {
     FragmentAppBinding binding;
     BottomNavigationView bottomNav;
+
+    AppViewModel viewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,6 +52,7 @@ public class AppFragment extends Fragment {
         loadFragment(new BlogsFeedFragment());
 
         bottomNav = binding.bottomNav;
+        viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         bottomNav.setOnItemSelectedListener(item -> {
             switch(item.getItemId()) {
@@ -59,7 +65,11 @@ public class AppFragment extends Fragment {
                     break;
 
                 case R.id.add:
-                    loadFragment(new NewBlogFragment());
+                    if (viewModel.getUser().getValue().getRole().equals("admin")){
+                        loadFragment(new WriteNewFragment());
+                    } else {
+                        loadFragment(new NewBlogFragment());
+                    }
                     break;
 
                 case R.id.notification:
