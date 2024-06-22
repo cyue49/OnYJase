@@ -42,6 +42,10 @@ public class Notification {
         return type;
     }
 
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
     // setters
     public void setNotificationID(String notificationID) {
         this.notificationID = notificationID;

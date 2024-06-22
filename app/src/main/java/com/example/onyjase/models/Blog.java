@@ -42,6 +42,10 @@ public class Blog {
         return imageURL;
     }
 
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
     // setters
     public void setBlogID(String blogID) {
         this.blogID = blogID;
