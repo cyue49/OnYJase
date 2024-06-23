@@ -3,6 +3,7 @@ package com.example.onyjase.views;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
@@ -16,6 +17,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.LinearLayout;
 
@@ -54,11 +56,32 @@ public class AppFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // start on blogs home feed page
         loadFragment(new BlogsFeedFragment());
 
+        // initializing variables
         bottomNav = binding.bottomNav;
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
+        // check if keyboard is visible
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Rect rect = new Rect();
+                view.getWindowVisibleDisplayFrame(rect);
+                int screenHeight = view.getRootView().getHeight();
+                int keyboardHeight = screenHeight - rect.bottom;
+
+                if (keyboardHeight > 100) { // keyboard visible
+                    bottomNav.setVisibility(View.GONE);
+                } else {
+                    bottomNav.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        // listeners for bottom navigation toolbar
         bottomNav.setOnItemSelectedListener(item -> {
             switch(item.getItemId()) {
                 case R.id.home:
@@ -89,6 +112,7 @@ public class AppFragment extends Fragment {
         });
     }
 
+    // go to fragment
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = getParentFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
