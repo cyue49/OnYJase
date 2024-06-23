@@ -1,6 +1,9 @@
 package com.example.onyjase.views;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,28 +12,30 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.LinearLayout;
 
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentAppBinding;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogsFeedFragment;
 import com.example.onyjase.views.blogs.NewBlogFragment;
-import com.example.onyjase.views.blogs.WriteNewFragment;
+import com.example.onyjase.views.blogs.NewPostFragment;
 import com.example.onyjase.views.notifications.NotificationsFragment;
 import com.example.onyjase.views.posts.PostsFeedFragment;
 import com.example.onyjase.views.user.UserProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
 
 // Fragment for the app once signed in
 public class AppFragment extends Fragment {
     FragmentAppBinding binding;
     BottomNavigationView bottomNav;
 
+    // view model
     AppViewModel viewModel;
 
     @Override
@@ -66,7 +71,7 @@ public class AppFragment extends Fragment {
 
                 case R.id.add:
                     if (viewModel.getUser().getValue().getRole().equals("admin")){
-                        loadFragment(new WriteNewFragment());
+                        showDialog();
                     } else {
                         loadFragment(new NewBlogFragment());
                     }
@@ -89,5 +94,39 @@ public class AppFragment extends Fragment {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.container, fragment);
         transaction.commit();
+    }
+
+    // show bottom sheet dialog for choosing between new blog or new post
+    private void showDialog() {
+        final Dialog dialog = new Dialog(requireContext());
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.new_post_bottom_sheet_layout);
+
+        LinearLayout optionBlog = dialog.findViewById(R.id.writeNewBlog);
+        LinearLayout optionPost = dialog.findViewById(R.id.writeNewPost);
+
+        // new blog
+        optionBlog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new NewBlogFragment());
+                dialog.dismiss();
+            }
+        });
+
+        // new post
+        optionPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new NewPostFragment());
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().getAttributes().windowAnimations = R.style.BottomSheetDialogAnimation;
+        dialog.getWindow().setGravity(Gravity.BOTTOM);
     }
 }

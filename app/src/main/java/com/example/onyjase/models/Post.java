@@ -9,17 +9,18 @@ public class Post {
     private String userID;
     private String title;
     private String content;
-    private String tag;
+    private String tag; // learn, exam, bill96, or other
     private String imageURL;
-    private @ServerTimestamp Date timestamp;
+    private Date timestamp;
 
-    public Post(String postID, String userID, String title, String content, String tag, String imageURL) {
+    public Post(String postID, String userID, String title, String content, String tag, String imageURL, Date timestamp) {
         this.postID = postID;
         this.userID = userID;
         this.title = title;
         this.content = content;
         this.tag = tag;
         this.imageURL = imageURL;
+        this.timestamp = timestamp;
     }
 
     // getters
@@ -74,5 +75,9 @@ public class Post {
 
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 }
