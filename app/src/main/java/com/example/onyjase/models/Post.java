@@ -11,15 +11,16 @@ public class Post {
     private String content;
     private String tag;
     private String imageURL;
-    private @ServerTimestamp Date timestamp;
+    private Date timestamp;
 
-    public Post(String postID, String userID, String title, String content, String tag, String imageURL) {
+    public Post(String postID, String userID, String title, String content, String tag, String imageURL, Date timestamp) {
         this.postID = postID;
         this.userID = userID;
         this.title = title;
         this.content = content;
         this.tag = tag;
         this.imageURL = imageURL;
+        this.timestamp = timestamp;
     }
 
     // getters
