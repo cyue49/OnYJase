@@ -26,12 +26,15 @@ import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentNewPostBinding;
 import com.example.onyjase.models.Post;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.example.onyjase.views.posts.PostFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.Date;
 import java.util.UUID;
@@ -197,7 +200,7 @@ public class NewPostFragment extends Fragment {
                     @Override
                     public void onSuccess(Void unused) {
                         // save image to storage
-                        // todo
+                        saveImageToStorage(post, curImage);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -206,5 +209,33 @@ public class NewPostFragment extends Fragment {
                         Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    // save image to storage
+    private void saveImageToStorage(Post post, Uri image) {
+        StorageReference storageRef = storage.getReference();
+        StorageReference postImgRef = storageRef.child("posts/" + post.getPostID());
+        postImgRef.putFile(image).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // toast success message
+                Toast.makeText(requireContext(), "New admin post posted.", Toast.LENGTH_SHORT).show();
+
+                // update view model current post
+                viewModel.setCurrentPost(post);
+
+                // go to post page
+                loadFragment(new PostFragment());
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                // saving image to storage failed, delete post from database
+                db.collection("posts").document(post.getPostID()).delete();
+
+                // toast error message
+                Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
