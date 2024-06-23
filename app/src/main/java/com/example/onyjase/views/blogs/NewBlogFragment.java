@@ -89,11 +89,7 @@ public class NewBlogFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 clearInputs();
-                if (viewModel.getUser().getValue().getRole().equals("admin")){
-                    loadFragment(new WriteNewFragment());
-                } else {
-                    loadFragment(new BlogsFeedFragment());
-                }
+                loadFragment(new BlogsFeedFragment());
             }
         });
 

@@ -27,6 +27,7 @@ import com.example.onyjase.databinding.FragmentNewPostBinding;
 import com.example.onyjase.models.Post;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.posts.PostFragment;
+import com.example.onyjase.views.posts.PostsFeedFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
@@ -98,11 +99,7 @@ public class NewPostFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 clearInputs();
-                if (viewModel.getUser().getValue().getRole().equals("admin")){
-                    loadFragment(new WriteNewFragment());
-                } else {
-                    loadFragment(new BlogsFeedFragment());
-                }
+                loadFragment(new PostsFeedFragment());
             }
         });
 
