@@ -99,6 +99,30 @@ public class NewPostFragment extends Fragment {
                 }
             }
         });
+
+        // post button
+        postBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // todo
+            }
+        });
+
+        // select image btn
+        selectImgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickImage();
+            }
+        });
+
+        // select image box
+        selectImgBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickImage();
+            }
+        });
     }
 
     // clear all inputs
