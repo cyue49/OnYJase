@@ -9,7 +9,9 @@
     android:fillViewport="true"
     tools:context=".views.blogs.BlogFragment">
 
+    <!-- header -->
     <LinearLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:orientation="horizontal"
@@ -19,13 +21,14 @@
         app:layout_constraintTop_toTopOf="parent"
         android:background="@color/subBlue">
 
-
         <ImageView
             android:id="@+id/backBtn"
             android:layout_width="20dp"
             android:layout_height="25dp"
             android:layout_marginStart="20dp"
             android:contentDescription="back button"
+            android:clickable="true"
+            android:focusable="true"
             android:src="@drawable/back_icon" />
 
         <View
@@ -40,6 +43,8 @@
             android:layout_marginEnd="20dp"
             android:contentDescription="edit button"
             android:visibility="invisible"
+            android:clickable="true"
+            android:focusable="true"
             android:src="@drawable/edit_icon" />
 
         <ImageView
@@ -49,8 +54,111 @@
             android:layout_marginEnd="20dp"
             android:contentDescription="delete button"
             android:visibility="invisible"
+            android:clickable="true"
+            android:focusable="true"
             android:src="@drawable/delete_icon" />
     </LinearLayout>
+
+    <!-- Blog Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp" >
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sharing Some Tips About Learning French"
+                android:textColor="@color/mainBlue"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/dateTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:text="2024/03/03 12:01:23" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical" >
+
+            <TextView
+                android:id="@+id/by"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="By: "
+                android:textColor="@color/subBlue"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Bob"
+                android:textColor="@color/subBlue"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width = "0dp"
+                android:layout_height = "wrap_content"
+                android:layout_weight = "1"/>
+
+            <TextView
+                android:id="@+id/likes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="0"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/likeBtn"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:clickable="true"
+                android:contentDescription="heart button"
+                android:focusable="true"
+                android:src="@drawable/gray_heart" />
+
+        </LinearLayout>
+
+            <TextView
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="10sp"
+                android:text="@string/sample_text"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:justificationMode="inter_word"
+                tools:ignore="UnusedAttribute" />
+        </LinearLayout>
+
+    </ScrollView>
 
 <!--    <com.google.android.material.textfield.TextInputLayout-->
 <!--        android:id="@+id/commentBox"-->
@@ -59,6 +167,8 @@
 <!--        android:layout_height="wrap_content"-->
 <!--        android:hint="Comment"-->
 <!--        android:padding="5dp"-->
+<!--        android:background="@color/white"-->
+<!--        app:boxBackgroundColor="@color/white"-->
 <!--        app:boxBackgroundMode="outline"-->
 <!--        app:boxCornerRadiusBottomEnd="25dp"-->
 <!--        app:boxCornerRadiusBottomStart="25dp"-->
