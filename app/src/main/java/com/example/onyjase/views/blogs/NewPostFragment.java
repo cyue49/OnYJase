@@ -20,14 +20,21 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentNewPostBinding;
+import com.example.onyjase.models.Post;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
+
+import java.util.Date;
+import java.util.UUID;
 
 public class NewPostFragment extends Fragment {
     FragmentNewPostBinding binding;
@@ -104,7 +111,22 @@ public class NewPostFragment extends Fragment {
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo
+                if (titleInput.getText() == null || contentInput.getText() == null || titleInput.getText().toString().isEmpty() || contentInput.getText().toString().isEmpty() || curImage == null || radioGroup.getCheckedRadioButtonId() == -1){
+                    Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
+                } else {
+                    // save post to db
+                    if (learnRadio.isChecked()) {
+                        savePostToDB(titleInput.getText().toString(), contentInput.getText().toString(), "learn");
+                    } else if (examRadio.isChecked()) {
+                        savePostToDB(titleInput.getText().toString(), contentInput.getText().toString(), "exam");
+                    } else if (bill96Radio.isChecked()) {
+                        savePostToDB(titleInput.getText().toString(), contentInput.getText().toString(), "bill96");
+                    } else if (otherRadio.isChecked()) {
+                        savePostToDB(titleInput.getText().toString(), contentInput.getText().toString(), "other");
+                    } else {
+                        Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
 
@@ -153,10 +175,36 @@ public class NewPostFragment extends Fragment {
             }
     );
 
+    // go to another fragment
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = getParentFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.container, fragment);
         transaction.commit();
+    }
+
+    // save post to db
+    private void savePostToDB(String title, String content, String tag) {
+        String userID = mAuth.getCurrentUser().getUid();
+        String postID = UUID.randomUUID().toString().replace("-", "");
+        Date dateTime = new Date();
+        Post post = new Post(postID, userID, title, content, tag, "posts/" + postID, dateTime);
+
+        db.collection("posts")
+                .document(postID)
+                .set(post)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        // save image to storage
+                        // todo
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

@@ -158,6 +158,7 @@ public class NewBlogFragment extends Fragment {
             }
             );
 
+    // go to another fragment
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = getParentFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
