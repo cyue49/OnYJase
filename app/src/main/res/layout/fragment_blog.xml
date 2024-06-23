@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,76 +9,74 @@
     android:fillViewport="true"
     tools:context=".views.blogs.BlogFragment">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="55dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@color/subBlue">
 
-        <RelativeLayout
-            android:id="@+id/headerLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_above="@+id/mainLayout">
 
-            <ImageView
-                android:id="@+id/header"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:contentDescription="Page header"
-                android:src="@drawable/blue_rectangle"/>
+        <ImageView
+            android:id="@+id/backBtn"
+            android:layout_width="20dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="20dp"
+            android:contentDescription="back button"
+            android:src="@drawable/back_icon" />
 
-        </RelativeLayout>
-        
-        <LinearLayout
-            android:id="@+id/mainLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:orientation="vertical">
-            
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="temp"/>
-            
-        </LinearLayout>
+        <View
+            android:layout_width = "0dp"
+            android:layout_height = "wrap_content"
+            android:layout_weight = "1"/>
 
-        <RelativeLayout
-            android:id="@+id/bottomLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@+id/mainLayout">
+        <ImageView
+            android:id="@+id/editBtn"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="20dp"
+            android:contentDescription="edit button"
+            android:visibility="invisible"
+            android:src="@drawable/edit_icon" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/commentBox"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Comment"
-                android:padding="5dp"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="25dp"
-                app:boxCornerRadiusBottomStart="25dp"
-                app:boxCornerRadiusTopEnd="25dp"
-                app:boxCornerRadiusTopStart="25dp"
-                app:boxStrokeColor="@color/subBlue"
-                app:endIconTint="@color/subBlue"
-                app:hintTextColor="@color/subBlue"
-                app:startIconTint="@color/subBlue">
+        <ImageView
+            android:id="@+id/deleteBtn"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="20dp"
+            android:contentDescription="delete button"
+            android:visibility="invisible"
+            android:src="@drawable/delete_icon" />
+    </LinearLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/commentInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="top"
-                    android:textColorLink="@color/subBlue"
-                    tools:ignore="KeyboardInaccessibleWidget" />
+<!--    <com.google.android.material.textfield.TextInputLayout-->
+<!--        android:id="@+id/commentBox"-->
+<!--        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:hint="Comment"-->
+<!--        android:padding="5dp"-->
+<!--        app:boxBackgroundMode="outline"-->
+<!--        app:boxCornerRadiusBottomEnd="25dp"-->
+<!--        app:boxCornerRadiusBottomStart="25dp"-->
+<!--        app:boxCornerRadiusTopEnd="25dp"-->
+<!--        app:boxCornerRadiusTopStart="25dp"-->
+<!--        app:boxStrokeColor="@color/subBlue"-->
+<!--        app:endIconTint="@color/subBlue"-->
+<!--        app:hintTextColor="@color/subBlue"-->
+<!--        app:startIconTint="@color/subBlue">-->
 
-            </com.google.android.material.textfield.TextInputLayout>
-    
-        </RelativeLayout>
+<!--        <com.google.android.material.textfield.TextInputEditText-->
+<!--            android:id="@+id/commentInput"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:gravity="top"-->
+<!--            android:textColorLink="@color/subBlue"-->
+<!--            tools:ignore="KeyboardInaccessibleWidget" />-->
 
-    </RelativeLayout>
+<!--    </com.google.android.material.textfield.TextInputLayout>-->
 
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
