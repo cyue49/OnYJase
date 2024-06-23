@@ -55,9 +55,6 @@ public class NewPostFragment extends Fragment {
     // firebase firestore
     FirebaseFirestore db;
 
-    // firebase auth
-    FirebaseAuth mAuth;
-
     // firebase storage
     FirebaseStorage storage;
 
@@ -92,7 +89,6 @@ public class NewPostFragment extends Fragment {
         bill96Radio = binding.bill96Radio;
         otherRadio = binding.otherRadio;
         radioGroup = binding.tagsRadioGroup;
-        mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
@@ -188,7 +184,7 @@ public class NewPostFragment extends Fragment {
 
     // save post to db
     private void savePostToDB(String title, String content, String tag) {
-        String userID = mAuth.getCurrentUser().getUid();
+        String userID = viewModel.getUser().getValue().getUserID();
         String postID = UUID.randomUUID().toString().replace("-", "");
         Date dateTime = new Date();
         Post post = new Post(postID, userID, title, content, tag, "posts/" + postID, dateTime);

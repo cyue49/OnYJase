@@ -51,9 +51,6 @@ public class NewBlogFragment extends Fragment {
     // firebase firestore
     FirebaseFirestore db;
 
-    // firebase auth
-    FirebaseAuth mAuth;
-
     // firebase storage
     FirebaseStorage storage;
 
@@ -83,7 +80,6 @@ public class NewBlogFragment extends Fragment {
         contentInput = binding.content;
         selectImgBtn = binding.selectImgBtn;
         selectImgBox = binding.selectedImg;
-        mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
@@ -168,7 +164,7 @@ public class NewBlogFragment extends Fragment {
 
     // save blog to db
     private void saveBlogToDB(String title, String content) {
-        String userID = mAuth.getCurrentUser().getUid();
+        String userID = viewModel.getUser().getValue().getUserID();
         String blogID = UUID.randomUUID().toString().replace("-", "");
         Date dateTime = new Date();
         Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID, dateTime);

@@ -9,7 +9,7 @@ public class Post {
     private String userID;
     private String title;
     private String content;
-    private String tag;
+    private String tag; // learn, exam, bill96, or other
     private String imageURL;
     private Date timestamp;
 
