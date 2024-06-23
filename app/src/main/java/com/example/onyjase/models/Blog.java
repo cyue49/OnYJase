@@ -10,15 +10,16 @@ public class Blog {
     private String title;
     private String content;
     private String imageURL;
-    private @ServerTimestamp Date timestamp;
+    private Date timestamp;
 
     // constructor
-    public Blog(String blogID, String userID, String title, String content, String imageURL) {
+    public Blog(String blogID, String userID, String title, String content, String imageURL, Date timestamp) {
         this.blogID = blogID;
         this.userID = userID;
         this.title = title;
         this.content = content;
         this.imageURL = imageURL;
+        this.timestamp = timestamp;
     }
 
     // getters
