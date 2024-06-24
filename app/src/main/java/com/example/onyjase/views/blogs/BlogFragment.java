@@ -122,7 +122,7 @@ public class BlogFragment extends Fragment {
 
         // setting adapter for comments recycle view
         commentList.setLayoutManager(new LinearLayoutManager(getContext()));
-        CommentAdapter adapter = new CommentAdapter(comments, getContext());
+        CommentAdapter adapter = new CommentAdapter(comments, getContext(), db);
         commentList.setAdapter(adapter);
 
         // submit comment button

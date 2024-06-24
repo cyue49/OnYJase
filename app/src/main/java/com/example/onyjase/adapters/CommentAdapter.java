@@ -12,6 +12,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.onyjase.R;
 import com.example.onyjase.models.Comment;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,11 +25,13 @@ import java.util.ArrayList;
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
     ArrayList<Comment> comments;
     Context context;
+    FirebaseFirestore db;
 
-    public CommentAdapter(ArrayList<Comment> comments, Context context) {
+    public CommentAdapter(ArrayList<Comment> comments, Context context, FirebaseFirestore db) {
         super();
         this.comments = comments;
         this.context = context;
+        this.db = db;
     }
 
     @NonNull
@@ -38,7 +45,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = comments.get(position);
-//        holder.username.setText(comment.getUserID());
+        setCommentUsername(holder, comment.getUserID());
         @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         holder.dateTime.setText(formatter.format(comment.getTimestamp()));
         holder.content.setText(comment.getContent());
@@ -53,6 +60,25 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     @SuppressLint("NotifyDataSetChanged")
     public void reload() {
         notifyDataSetChanged();
+    }
+
+    // get comment username
+    private void setCommentUsername(CommentViewHolder holder, String userID) {
+        DocumentReference docRef = db.collection("users").document(userID);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        holder.username.setText(document.getString("username"));
+                    } else {
+                        holder.username.setText("User");
+                    }
+                }
+            }
+        });
     }
 
     // viwe holder for comments
