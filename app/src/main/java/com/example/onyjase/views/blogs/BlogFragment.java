@@ -41,6 +41,7 @@ import com.google.firebase.storage.StorageReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
 
 // Fragment for a single blog
 public class BlogFragment extends Fragment {
@@ -132,11 +133,7 @@ public class BlogFragment extends Fragment {
                     Toast.makeText(requireContext(), "Empty comment.", Toast.LENGTH_SHORT).show();
                 } else {
                     // save comment to db
-
-                    Comment newComment = new Comment("", "", "", "test", "", new Date());
-                    comments.add(newComment);
-                    adapter.reload();
-                    clearInputs();
+                    saveCommentToDB(commentInput.getText().toString(), adapter);
                 }
             }
         });
@@ -197,6 +194,36 @@ public class BlogFragment extends Fragment {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(requireContext(), "Failed reading blog cover image.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // save new comment to db
+    private void saveCommentToDB(String content, CommentAdapter adapter) {
+        String userID = viewModel.getUser().getValue().getUserID();
+        String commentID = UUID.randomUUID().toString().replace("-", "");
+        String blogID = viewModel.getCurrentBlog().getValue().getBlogID();
+        Date dateTime = new Date();
+
+        Comment comment = new Comment(commentID, userID, blogID, content, "", dateTime);
+
+        db.collection("comments")
+                .document(commentID)
+                .set(comment)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Toast.makeText(requireContext(), "New comment posted!", Toast.LENGTH_SHORT).show();
+
+                        comments.add(comment);
+                        adapter.reload();
+                        clearInputs();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(requireContext(), "Error posting new comment.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
