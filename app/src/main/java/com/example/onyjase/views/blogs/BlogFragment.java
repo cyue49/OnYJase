@@ -44,6 +44,8 @@ import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.UUID;
 
@@ -227,6 +229,7 @@ public class BlogFragment extends Fragment {
 
                                 Comment comment = new Comment(commentID, userID, blogId, content, stickerURL, timestamp);
                                 comments.add(comment);
+                                sortCommentsByDate(comments);
                                 count++;
                             }
                             adapter.reload();
@@ -268,5 +271,15 @@ public class BlogFragment extends Fragment {
                         Toast.makeText(requireContext(), "Error posting new comment.", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void sortCommentsByDate(ArrayList<Comment> comments) {
+        Collections.sort(comments, new Comparator<Comment>() {
+            @Override
+            public int compare(Comment o1, Comment o2) {
+                if (o1.getTimestamp().equals(o2.getTimestamp())) return 0;
+                return o1.getTimestamp().compareTo(o2.getTimestamp()) * -1;
+            }
+        });
     }
 }
