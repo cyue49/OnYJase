@@ -82,7 +82,7 @@
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sharing Some Tips About Learning French"
+                android:text=""
                 android:textColor="@color/mainBlue"
                 android:textSize="28sp"
                 android:textStyle="bold" />
@@ -95,7 +95,7 @@
                 android:layout_marginTop="10dp"
                 android:textColor="@color/black"
                 android:textSize="14sp"
-                android:text="2024/03/03 12:01:23" />
+                android:text="" />
 
             <!-- user and likes -->
             <LinearLayout
@@ -119,7 +119,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:text="Bob"
+                    android:text=""
                     android:textColor="@color/subBlue"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -165,7 +165,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="10sp"
-                android:text="@string/sample_text"
+                android:text=""
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:layout_marginBottom="20dp"
