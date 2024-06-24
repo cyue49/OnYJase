@@ -113,12 +113,13 @@ public class BlogFragment extends Fragment {
         // display content from current blog of view model
         String currentBlogID = viewModel.getCurrentBlogID().getValue();
         if (currentBlogID != null) {
-            // set like icon depending on if current user has previously like current blog
-            setLikeIcon(currentBlogID);
-
             // set title, content, date, likes, author, and cover image
             setBlogContent(currentBlogID);
+
+            // set like icon depending on if current user has previously like current blog
+            setLikeIcon(currentBlogID);
         } else {
+            Toast.makeText(requireContext(), "Error fetching blog.", Toast.LENGTH_SHORT).show();
             loadFragment(new BlogsFeedFragment());
         }
 
@@ -298,6 +299,7 @@ public class BlogFragment extends Fragment {
                     }
                 } else {
                     Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
+                    loadFragment(new BlogsFeedFragment());
                 }
             }
         });
