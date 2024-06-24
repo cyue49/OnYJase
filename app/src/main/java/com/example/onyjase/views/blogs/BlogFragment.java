@@ -59,7 +59,7 @@ public class BlogFragment extends Fragment {
     Button clearBtn, submitBtn;
     RecyclerView commentList;
 
-    // arraylist of all comments for the blog
+    // list of all comments for the blog
     LinkedList<Comment> comments;
 
     // view model
@@ -134,6 +134,12 @@ public class BlogFragment extends Fragment {
         // set all comments for current blog
         setAllBlogComments(currentBlog.getBlogID(), adapter);
 
+        // show edit & delete button if user is current blog author
+        if (viewModel.getUser().getValue().getUserID().equals(currentBlog.getUserID())) {
+            editBtn.setVisibility(View.VISIBLE);
+            deleteBtn.setVisibility(View.VISIBLE);
+        }
+
         // submit comment button
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,6 +158,30 @@ public class BlogFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 clearInputs();
+            }
+        });
+
+        // back button
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new BlogsFeedFragment());
+            }
+        });
+
+        // edit button
+        editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // todo
+            }
+        });
+
+        // delete button
+        deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // todo
             }
         });
     }
