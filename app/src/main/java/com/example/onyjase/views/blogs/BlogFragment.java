@@ -110,6 +110,7 @@ public class BlogFragment extends Fragment {
             loadFragment(new BlogsFeedFragment());
         }
 
+        // setting adapter for comments recycle view
     }
 
     // go to another fragment
