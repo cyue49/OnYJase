@@ -163,7 +163,7 @@ public class NewBlogFragment extends Fragment {
         String userID = viewModel.getUser().getValue().getUserID();
         String blogID = UUID.randomUUID().toString().replace("-", "");
         Date dateTime = new Date();
-        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID, dateTime);
+        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID, 0, dateTime);
 
         db.collection("blogs")
                 .document(blogID)

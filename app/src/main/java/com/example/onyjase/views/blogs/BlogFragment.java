@@ -117,11 +117,12 @@ public class BlogFragment extends Fragment {
             // set author username
             setBlogUserName(currentBlog.getUserID());
 
-            // set title, content, and date
+            // set title, content, date, and likes
             titleTxt.setText(currentBlog.getTitle());
             contentTxt.setText(currentBlog.getContent());
             @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             dateTimeTxt.setText(formatter.format(currentBlog.getTimestamp()));
+            likesTxt.setText(String.valueOf(currentBlog.getLikes()));
         } else {
             loadFragment(new BlogsFeedFragment());
         }
