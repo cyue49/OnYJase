@@ -20,14 +20,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 // adapter for list of comments in single blog page
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
-    ArrayList<Comment> comments;
+    LinkedList<Comment> comments;
     Context context;
     FirebaseFirestore db;
 
-    public CommentAdapter(ArrayList<Comment> comments, Context context, FirebaseFirestore db) {
+    public CommentAdapter(LinkedList<Comment> comments, Context context, FirebaseFirestore db) {
         super();
         this.comments = comments;
         this.context = context;

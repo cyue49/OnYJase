@@ -43,10 +43,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.UUID;
 
 // Fragment for a single blog
@@ -61,7 +60,7 @@ public class BlogFragment extends Fragment {
     RecyclerView commentList;
 
     // arraylist of all comments for the blog
-    ArrayList<Comment> comments;
+    LinkedList<Comment> comments;
 
     // view model
     AppViewModel viewModel;
@@ -104,7 +103,7 @@ public class BlogFragment extends Fragment {
         clearBtn = binding.clearBtn;
         submitBtn = binding.submitBtn;
         commentList = binding.commentsList;
-        comments = new ArrayList<>();
+        comments = new LinkedList<>();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
@@ -258,7 +257,7 @@ public class BlogFragment extends Fragment {
                     public void onSuccess(Void unused) {
                         Toast.makeText(requireContext(), "New comment posted!", Toast.LENGTH_SHORT).show();
 
-                        comments.add(comment);
+                        comments.addFirst(comment);
                         adapter.reload();
                         int count = Integer.parseInt(commentsCount.getText().toString());
                         commentsCount.setText(String.valueOf(count+1));
@@ -273,8 +272,8 @@ public class BlogFragment extends Fragment {
                 });
     }
 
-    private void sortCommentsByDate(ArrayList<Comment> comments) {
-        Collections.sort(comments, new Comparator<Comment>() {
+    private void sortCommentsByDate(LinkedList<Comment> comments) {
+        comments.sort(new Comparator<Comment>() {
             @Override
             public int compare(Comment o1, Comment o2) {
                 if (o1.getTimestamp().equals(o2.getTimestamp())) return 0;
