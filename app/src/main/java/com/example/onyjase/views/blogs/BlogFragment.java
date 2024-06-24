@@ -1,6 +1,7 @@
 package com.example.onyjase.views.blogs;
 
 import android.annotation.SuppressLint;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -56,7 +57,7 @@ public class BlogFragment extends Fragment {
 
     // ui components variables
     ImageView likeIcon, coverImg;
-    TextView titleTxt, dateTimeTxt, authorTxt, contentTxt, likesTxt, commentsCount;
+    TextView titleTxt, dateTimeTxt, authorTxt, contentTxt, likesTxt, commentsCount, newestBtn, oldestBtn;
     TextInputEditText commentInput;
     Button clearBtn, submitBtn;
     LinearLayout likeBtn, backBtn, editBtn, deleteBtn;
@@ -106,6 +107,8 @@ public class BlogFragment extends Fragment {
         commentInput = binding.commentInput;
         clearBtn = binding.clearBtn;
         submitBtn = binding.submitBtn;
+        newestBtn = binding.newestBtn;
+        oldestBtn = binding.oldestBtn;
         commentList = binding.commentsList;
         comments = new LinkedList<>();
         db = FirebaseFirestore.getInstance();
@@ -187,6 +190,40 @@ public class BlogFragment extends Fragment {
                 Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // sort comments by newest button
+        newestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // updating buttons ui
+                newestBtn.setTypeface(newestBtn.getTypeface(), Typeface.BOLD);
+                newestBtn.setAlpha(1.0f);
+
+                oldestBtn.setTypeface(oldestBtn.getTypeface(), Typeface.NORMAL);
+                oldestBtn.setAlpha(0.5f);
+
+                // updating comments
+                sortCommentsByDate(comments, true);
+                adapter.reload();
+            }
+        });
+
+        // sort comments by oldest button
+        oldestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // updating buttons ui
+                oldestBtn.setTypeface(oldestBtn.getTypeface(), Typeface.BOLD);
+                oldestBtn.setAlpha(1.0f);
+
+                newestBtn.setTypeface(newestBtn.getTypeface(), Typeface.NORMAL);
+                newestBtn.setAlpha(0.5f);
+
+                // updating comments
+                sortCommentsByDate(comments, false);
+                adapter.reload();
+            }
+        });
     }
 
     // clear all inputs
@@ -261,7 +298,7 @@ public class BlogFragment extends Fragment {
 
                                 Comment comment = new Comment(commentID, userID, blogId, content, stickerURL, timestamp);
                                 comments.add(comment);
-                                sortCommentsByDate(comments);
+                                sortCommentsByDate(comments, true);
                                 count++;
                             }
                             adapter.reload();
@@ -342,12 +379,12 @@ public class BlogFragment extends Fragment {
     }
 
     // sort list of comments by date
-    private void sortCommentsByDate(LinkedList<Comment> comments) {
+    private void sortCommentsByDate(LinkedList<Comment> comments, Boolean newestFirst) {
         comments.sort(new Comparator<Comment>() {
             @Override
             public int compare(Comment o1, Comment o2) {
                 if (o1.getTimestamp().equals(o2.getTimestamp())) return 0;
-                return o1.getTimestamp().compareTo(o2.getTimestamp()) * -1;
+                return newestFirst ? o1.getTimestamp().compareTo(o2.getTimestamp()) * -1 : o1.getTimestamp().compareTo(o2.getTimestamp());
             }
         });
     }
