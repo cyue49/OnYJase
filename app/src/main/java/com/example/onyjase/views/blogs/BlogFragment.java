@@ -35,6 +35,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -46,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 // Fragment for a single blog
@@ -117,6 +119,9 @@ public class BlogFragment extends Fragment {
             // set author username
             setBlogUserName(currentBlog.getUserID());
 
+            // set like icon depending on if current user has previously like current blog
+            setLikeIcon(currentBlog.getBlogID());
+
             // set title, content, date, and likes
             titleTxt.setText(currentBlog.getTitle());
             contentTxt.setText(currentBlog.getContent());
@@ -159,6 +164,14 @@ public class BlogFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 clearInputs();
+            }
+        });
+
+        // likes button
+        likeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateBlogLikes(currentBlog.getBlogID());
             }
         });
 
@@ -303,6 +316,7 @@ public class BlogFragment extends Fragment {
                 });
     }
 
+    // sort list of comments by date
     private void sortCommentsByDate(LinkedList<Comment> comments) {
         comments.sort(new Comparator<Comment>() {
             @Override
@@ -311,5 +325,116 @@ public class BlogFragment extends Fragment {
                 return o1.getTimestamp().compareTo(o2.getTimestamp()) * -1;
             }
         });
+    }
+
+    // set blog like icon depending on if current user like it or not
+    private void setLikeIcon(String blogID) {
+        String userID = viewModel.getUser().getValue().getUserID();
+        db.collection("users")
+                .document(userID)
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                List<String> userLikes = (List<String>) document.get("favorites");
+                                if (userLikes.contains(blogID)) {
+                                    likeBtn.setImageResource(R.drawable.blue_heart);
+                                } else {
+                                    likeBtn.setImageResource(R.drawable.gray_heart);
+                                }
+                            }
+                        } else {
+                            Toast.makeText(requireContext(), "Error updating likes.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    // update favorites list of current user when clicking like
+    private void updateBlogLikes(String blogID){
+        String userID = viewModel.getUser().getValue().getUserID();
+        DocumentReference docRef = db.collection("users").document(userID);
+
+        // check if already added to favorites
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        List<String> userLikes = (List<String>) document.get("favorites");
+                        if (userLikes.contains(blogID)) { // already in favorites
+                            // remove blogID from current user's favorites list
+                            docRef
+                                    .update("favorites", FieldValue.arrayRemove(blogID))
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()){
+                                                // update likes count for current blog
+                                                updateBlogLikesCount(blogID, false);
+                                            } else {
+                                                Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                        } else { // not already in favorites
+                            // add blogID to current user's favorites list
+                            docRef
+                                    .update("favorites", FieldValue.arrayUnion(blogID))
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()){
+                                                // update likes count for current blog
+                                                updateBlogLikesCount(blogID, true);
+                                            } else {
+                                                Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+                }
+            }
+        });
+
+
+    }
+
+    // update likes count for current blog when clicking like
+    private void updateBlogLikesCount(String blogID, boolean isAdd) {
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+
+        // get current likes count
+        docRef
+            .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            int curLikes = document.getDouble("likes").intValue();
+                            // update likes count + 1 / -1
+                            docRef.update("likes", isAdd ? curLikes+1 : curLikes-1).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        // update ui
+                                        likeBtn.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
+                                        likesTxt.setText(String.valueOf(isAdd ? curLikes+1 : curLikes-1));
+                                    } else {
+                                        Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
     }
 }
