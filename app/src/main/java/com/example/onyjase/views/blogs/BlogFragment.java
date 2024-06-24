@@ -32,9 +32,13 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -125,6 +129,9 @@ public class BlogFragment extends Fragment {
         CommentAdapter adapter = new CommentAdapter(comments, getContext(), db);
         commentList.setAdapter(adapter);
 
+        // set all comments for current blog
+        setAllBlogComments(currentBlog.getBlogID(), adapter);
+
         // submit comment button
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,7 +179,7 @@ public class BlogFragment extends Fragment {
                         authorTxt.setText(document.getString("username"));
                     }
                 } else {
-                    Toast.makeText(requireContext(), "Failed reading blog author.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Error getting blog author.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -193,7 +200,36 @@ public class BlogFragment extends Fragment {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(requireContext(), "Failed reading blog cover image.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Error getting blog cover image.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // set all comments for the current blog
+    private void setAllBlogComments(String blogID, CommentAdapter adapter){
+        // get all comments where blogID equals current blogID
+        CollectionReference colRef = db.collection("comments");
+        Query query = colRef.whereEqualTo("blogID", blogID);
+        query.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String commentID = document.getString("commentID");
+                                String userID = document.getString("userID");
+                                String blogId = document.getString("blogID");
+                                String content = document.getString("content");
+                                String stickerURL = document.getString("stickerURL");
+                                Date timestamp = document.getTimestamp("timestamp").toDate();
+
+                                Comment comment = new Comment(commentID, userID, blogId, content, stickerURL, timestamp);
+                                comments.add(comment);
+                            }
+                            adapter.reload();
+                        } else {
+                            Toast.makeText(requireContext(), "Error getting blog comments.", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
     }
