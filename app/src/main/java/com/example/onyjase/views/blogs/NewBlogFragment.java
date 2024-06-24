@@ -27,7 +27,6 @@ import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -172,7 +171,7 @@ public class NewBlogFragment extends Fragment {
                     @Override
                     public void onSuccess(Void unused) {
                         // save image to storage
-                        saveImageToStorage(blog, curImage);
+                        saveImageToStorage(blogID, curImage);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -184,9 +183,9 @@ public class NewBlogFragment extends Fragment {
     }
 
     // save image to storage
-    private void saveImageToStorage(Blog blog, Uri image) {
+    private void saveImageToStorage(String blogID, Uri image) {
         StorageReference storageRef = storage.getReference();
-        StorageReference blogImgRef = storageRef.child("blogs/" + blog.getBlogID());
+        StorageReference blogImgRef = storageRef.child("blogs/" + blogID);
         blogImgRef.putFile(image).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -194,7 +193,7 @@ public class NewBlogFragment extends Fragment {
                 Toast.makeText(requireContext(), "New blog posted.", Toast.LENGTH_SHORT).show();
 
                 // update view model current blog
-                viewModel.setCurrentBlog(blog);
+                viewModel.setCurrentBlogID(blogID);
 
                 // go to blog page
                 loadFragment(new BlogFragment());
@@ -203,7 +202,7 @@ public class NewBlogFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Exception e) {
                 // saving image to storage failed, delete blog from database
-                db.collection("blogs").document(blog.getBlogID()).delete();
+                db.collection("blogs").document(blogID).delete();
 
                 // toast error message
                 Toast.makeText(requireContext(), "Error posting new blog.", Toast.LENGTH_SHORT).show();

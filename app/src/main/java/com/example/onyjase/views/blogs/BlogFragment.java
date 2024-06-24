@@ -111,23 +111,13 @@ public class BlogFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         // display content from current blog of view model
-        Blog currentBlog = viewModel.getCurrentBlog().getValue();
-        if (currentBlog != null) {
-            // set blog cover image
-            setBlogCoverImage(currentBlog.getImageURL());
-
-            // set author username
-            setBlogUserName(currentBlog.getUserID());
-
+        String currentBlogID = viewModel.getCurrentBlogID().getValue();
+        if (currentBlogID != null) {
             // set like icon depending on if current user has previously like current blog
-            setLikeIcon(currentBlog.getBlogID());
+            setLikeIcon(currentBlogID);
 
-            // set title, content, date, and likes
-            titleTxt.setText(currentBlog.getTitle());
-            contentTxt.setText(currentBlog.getContent());
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-            dateTimeTxt.setText(formatter.format(currentBlog.getTimestamp()));
-            likesTxt.setText(String.valueOf(currentBlog.getLikes()));
+            // set title, content, date, likes, author, and cover image
+            setBlogContent(currentBlogID);
         } else {
             loadFragment(new BlogsFeedFragment());
         }
@@ -138,13 +128,7 @@ public class BlogFragment extends Fragment {
         commentList.setAdapter(adapter);
 
         // set all comments for current blog
-        setAllBlogComments(currentBlog.getBlogID(), adapter);
-
-        // show edit & delete button if user is current blog author
-        if (viewModel.getUser().getValue().getUserID().equals(currentBlog.getUserID())) {
-            editBtn.setVisibility(View.VISIBLE);
-            deleteBtn.setVisibility(View.VISIBLE);
-        }
+        setAllBlogComments(currentBlogID, adapter);
 
         // submit comment button
         submitBtn.setOnClickListener(new View.OnClickListener() {
@@ -171,7 +155,7 @@ public class BlogFragment extends Fragment {
         likeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateBlogLikes(currentBlog.getBlogID());
+                updateBlogLikes(currentBlogID);
             }
         });
 
@@ -284,11 +268,46 @@ public class BlogFragment extends Fragment {
                 });
     }
 
+    // set the title, content, date, and number of likes for the current blog
+    private void setBlogContent(String blogID) {
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()){
+                        // show edit & delete button if user is current blog author
+                        if (viewModel.getUser().getValue().getUserID().equals(document.getString("userID"))) {
+                            editBtn.setVisibility(View.VISIBLE);
+                            deleteBtn.setVisibility(View.VISIBLE);
+                        }
+
+                        // set blog cover image
+                        setBlogCoverImage(document.getString("imageURL"));
+
+                        // set author username
+                        setBlogUserName(document.getString("userID"));
+
+                        // set title, content, date, and number of likes
+                        titleTxt.setText(document.getString("title"));
+                        contentTxt.setText(document.getString("content"));
+                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        dateTimeTxt.setText(formatter.format(document.getTimestamp("timestamp").toDate()));
+                        likesTxt.setText(String.valueOf(document.getDouble("likes").intValue()));
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     // save new comment to db
     private void saveCommentToDB(String content, CommentAdapter adapter) {
         String userID = viewModel.getUser().getValue().getUserID();
         String commentID = UUID.randomUUID().toString().replace("-", "");
-        String blogID = viewModel.getCurrentBlog().getValue().getBlogID();
+        String blogID = viewModel.getCurrentBlogID().getValue();
         Date dateTime = new Date();
 
         Comment comment = new Comment(commentID, userID, blogID, content, "", dateTime);

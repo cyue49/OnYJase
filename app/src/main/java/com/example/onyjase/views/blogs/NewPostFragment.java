@@ -31,7 +31,6 @@ import com.example.onyjase.views.posts.PostsFeedFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -193,7 +192,7 @@ public class NewPostFragment extends Fragment {
                     @Override
                     public void onSuccess(Void unused) {
                         // save image to storage
-                        saveImageToStorage(post, curImage);
+                        saveImageToStorage(postID, curImage);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -205,9 +204,9 @@ public class NewPostFragment extends Fragment {
     }
 
     // save image to storage
-    private void saveImageToStorage(Post post, Uri image) {
+    private void saveImageToStorage(String postID, Uri image) {
         StorageReference storageRef = storage.getReference();
-        StorageReference postImgRef = storageRef.child("posts/" + post.getPostID());
+        StorageReference postImgRef = storageRef.child("posts/" + postID);
         postImgRef.putFile(image).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -215,7 +214,7 @@ public class NewPostFragment extends Fragment {
                 Toast.makeText(requireContext(), "New admin post posted.", Toast.LENGTH_SHORT).show();
 
                 // update view model current post
-                viewModel.setCurrentPost(post);
+                viewModel.setCurrentPostID(postID);
 
                 // go to post page
                 loadFragment(new PostFragment());
@@ -224,7 +223,7 @@ public class NewPostFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Exception e) {
                 // saving image to storage failed, delete post from database
-                db.collection("posts").document(post.getPostID()).delete();
+                db.collection("posts").document(postID).delete();
 
                 // toast error message
                 Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show();
