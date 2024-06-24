@@ -53,7 +53,7 @@ public class BlogFragment extends Fragment {
 
     // ui components variables
     ImageView backBtn, editBtn, deleteBtn, likeBtn, coverImg;
-    TextView titleTxt, dateTimeTxt, authorTxt, contentTxt, likesTxt;
+    TextView titleTxt, dateTimeTxt, authorTxt, contentTxt, likesTxt, commentsCount;
     TextInputEditText commentInput;
     Button clearBtn, submitBtn;
     RecyclerView commentList;
@@ -96,6 +96,7 @@ public class BlogFragment extends Fragment {
         authorTxt = binding.username;
         contentTxt = binding.content;
         likesTxt = binding.likes;
+        commentsCount = binding.commentsCount;
         coverImg = binding.coverImage;
         commentInput = binding.commentInput;
         clearBtn = binding.clearBtn;
@@ -215,6 +216,7 @@ public class BlogFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
+                            int count = 0;
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String commentID = document.getString("commentID");
                                 String userID = document.getString("userID");
@@ -225,8 +227,10 @@ public class BlogFragment extends Fragment {
 
                                 Comment comment = new Comment(commentID, userID, blogId, content, stickerURL, timestamp);
                                 comments.add(comment);
+                                count++;
                             }
                             adapter.reload();
+                            commentsCount.setText(String.valueOf(count));
                         } else {
                             Toast.makeText(requireContext(), "Error getting blog comments.", Toast.LENGTH_SHORT).show();
                         }
@@ -253,6 +257,8 @@ public class BlogFragment extends Fragment {
 
                         comments.add(comment);
                         adapter.reload();
+                        int count = Integer.parseInt(commentsCount.getText().toString());
+                        commentsCount.setText(String.valueOf(count+1));
                         clearInputs();
                     }
                 })
