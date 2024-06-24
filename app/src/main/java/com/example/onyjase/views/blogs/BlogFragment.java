@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +25,6 @@ import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.adapters.CommentAdapter;
 import com.example.onyjase.databinding.FragmentBlogBinding;
-import com.example.onyjase.models.Blog;
 import com.example.onyjase.models.Comment;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -55,10 +55,11 @@ public class BlogFragment extends Fragment {
     FragmentBlogBinding binding;
 
     // ui components variables
-    ImageView backBtn, editBtn, deleteBtn, likeBtn, coverImg;
+    ImageView likeIcon, coverImg;
     TextView titleTxt, dateTimeTxt, authorTxt, contentTxt, likesTxt, commentsCount;
     TextInputEditText commentInput;
     Button clearBtn, submitBtn;
+    LinearLayout likeBtn, backBtn, editBtn, deleteBtn;
     RecyclerView commentList;
 
     // list of all comments for the blog
@@ -93,6 +94,7 @@ public class BlogFragment extends Fragment {
         backBtn = binding.backBtn;
         editBtn = binding.editBtn;
         deleteBtn = binding.deleteBtn;
+        likeIcon = binding.likeIcon;
         likeBtn = binding.likeBtn;
         titleTxt = binding.title;
         dateTimeTxt = binding.dateTime;
@@ -173,6 +175,7 @@ public class BlogFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // todo
+                Toast.makeText(requireContext(), "Edit clicked.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -181,6 +184,7 @@ public class BlogFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // todo
+                Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -361,9 +365,9 @@ public class BlogFragment extends Fragment {
                             if (document.exists()) {
                                 List<String> userLikes = (List<String>) document.get("favorites");
                                 if (userLikes.contains(blogID)) {
-                                    likeBtn.setImageResource(R.drawable.blue_heart);
+                                    likeIcon.setImageResource(R.drawable.blue_heart);
                                 } else {
-                                    likeBtn.setImageResource(R.drawable.gray_heart);
+                                    likeIcon.setImageResource(R.drawable.gray_heart);
                                 }
                             }
                         } else {
@@ -421,8 +425,6 @@ public class BlogFragment extends Fragment {
                 }
             }
         });
-
-
     }
 
     // update likes count for current blog when clicking like
@@ -444,7 +446,7 @@ public class BlogFragment extends Fragment {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         // update ui
-                                        likeBtn.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
+                                        likeIcon.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
                                         likesTxt.setText(String.valueOf(isAdd ? curLikes+1 : curLikes-1));
                                     } else {
                                         Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
