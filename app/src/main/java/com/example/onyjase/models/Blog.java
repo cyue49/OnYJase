@@ -10,15 +10,17 @@ public class Blog {
     private String title;
     private String content;
     private String imageURL;
+    private int likes;
     private Date timestamp;
 
     // constructor
-    public Blog(String blogID, String userID, String title, String content, String imageURL, Date timestamp) {
+    public Blog(String blogID, String userID, String title, String content, String imageURL, int likes, Date timestamp) {
         this.blogID = blogID;
         this.userID = userID;
         this.title = title;
         this.content = content;
         this.imageURL = imageURL;
+        this.likes = likes;
         this.timestamp = timestamp;
     }
 
@@ -41,6 +43,10 @@ public class Blog {
 
     public String getImageURL() {
         return imageURL;
+    }
+
+    public int getLikes() {
+        return likes;
     }
 
     public Date getTimestamp() {
@@ -66,6 +72,10 @@ public class Blog {
 
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
     }
 
     public void setTimestamp(Date timestamp) {
