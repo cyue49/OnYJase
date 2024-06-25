@@ -319,9 +319,14 @@
                             android:id="@+id/selectedSticker"
                             android:layout_width="60dp"
                             android:layout_height="60dp"
-                            android:layout_marginEnd="10dp"
                             android:contentDescription="selected sticker"
                             android:src="@drawable/gray_rectangle" />
+
+                        <View
+                            android:layout_width = "2dp"
+                            android:layout_height = "match_parent"
+                            android:layout_marginHorizontal="10dp"
+                            android:background="@color/subBlue"/>
 
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/stickersList"

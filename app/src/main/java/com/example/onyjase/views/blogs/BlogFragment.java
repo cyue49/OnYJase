@@ -245,6 +245,15 @@ public class BlogFragment extends Fragment {
                 }
             }
         });
+
+        // search sticker button
+        stickerSearchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // todo
+                Toast.makeText(requireContext(), "Sticker search clicked.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     // =============================================== Functions ===============================================
