@@ -32,6 +32,8 @@ import com.example.onyjase.models.Comment;
 import com.example.onyjase.models.stickers.Sticker;
 import com.example.onyjase.models.stickers.StickerImage;
 import com.example.onyjase.models.stickers.StickerImages;
+import com.example.onyjase.models.stickers.Stickers;
+import com.example.onyjase.utils.StickersService;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -56,6 +58,12 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 // Fragment for a single blog
 public class BlogFragment extends Fragment {
@@ -272,8 +280,11 @@ public class BlogFragment extends Fragment {
         stickerSearchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo
-                Toast.makeText(requireContext(), "Sticker search clicked.", Toast.LENGTH_SHORT).show();
+                if (stickerInput.getText() == null || stickerInput.getText().toString().isEmpty()) {
+                    Toast.makeText(requireContext(), "Enter something to search for stickers.", Toast.LENGTH_SHORT).show();
+                } else {
+                    stickersApiCall(stickerAdapter, stickerInput.getText().toString());
+                }
             }
         });
     }
@@ -551,5 +562,57 @@ public class BlogFragment extends Fragment {
                     }
                 }
             });
+    }
+
+    // stickers api call
+    private void stickersApiCall(StickerAdapter adapter, String query) {
+        // getting the api key
+        DocumentReference docRef = db.collection("apis").document("giphy");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        String apiKey = document.getString("apiKey");
+
+                        // setting up api call
+                        Retrofit retrofit = new Retrofit.Builder()
+                                .baseUrl("https://api.giphy.com/v1/")
+                                .addConverterFactory(GsonConverterFactory.create())
+                                .build();
+
+                        StickersService stickersService = retrofit.create(StickersService.class);
+
+                        // making api call
+                        Call<Stickers> call = stickersService.getStickers(apiKey, query);
+
+                        // handling the response
+                        call.enqueue(new Callback<Stickers>() {
+                            @Override
+                            public void onResponse(Call<Stickers> call, Response<Stickers> response) {
+                                if (!response.isSuccessful() && response.body() == null) {
+                                    Toast.makeText(requireContext(), "Error fetching stickers.", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                Stickers responseStickers = response.body();
+                                if (responseStickers != null) {
+                                    stickers.clear();
+                                    stickers.addAll(responseStickers.getData());
+                                    adapter.reload();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Stickers> call, Throwable throwable) {
+                                Toast.makeText(requireContext(), "Error fetching stickers.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Error fetching stickers.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }
