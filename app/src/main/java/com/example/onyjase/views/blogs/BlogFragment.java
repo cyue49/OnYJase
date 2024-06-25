@@ -26,8 +26,12 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.adapters.CommentAdapter;
+import com.example.onyjase.adapters.StickerAdapter;
 import com.example.onyjase.databinding.FragmentBlogBinding;
 import com.example.onyjase.models.Comment;
+import com.example.onyjase.models.stickers.Sticker;
+import com.example.onyjase.models.stickers.StickerImage;
+import com.example.onyjase.models.stickers.StickerImages;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -46,6 +50,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
@@ -69,7 +74,7 @@ public class BlogFragment extends Fragment {
     LinkedList<Comment> comments;
 
     // list of stickers when searching up stickers
-    // todo
+    ArrayList<Sticker> stickers;
 
     // view model
     AppViewModel viewModel;
@@ -123,6 +128,7 @@ public class BlogFragment extends Fragment {
         stickerSearchBtn = binding.stickerSearchBtn;
         blogContent = binding.blogContent;
         comments = new LinkedList<>();
+        stickers = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
@@ -144,11 +150,16 @@ public class BlogFragment extends Fragment {
 
         // setting adapter for comments recycle view
         commentList.setLayoutManager(new LinearLayoutManager(getContext()));
-        CommentAdapter adapter = new CommentAdapter(comments, getContext(), db);
-        commentList.setAdapter(adapter);
+        CommentAdapter commentAdapter = new CommentAdapter(comments, getContext(), db);
+        commentList.setAdapter(commentAdapter);
 
         // set all comments for current blog
-        setAllBlogComments(currentBlogID, adapter);
+        setAllBlogComments(currentBlogID, commentAdapter);
+
+        // setting adapter for stickers recycle view
+        stickersList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        StickerAdapter stickerAdapter = new StickerAdapter(stickers, getContext());
+        stickersList.setAdapter(stickerAdapter);
 
         // submit comment button
         submitBtn.setOnClickListener(new View.OnClickListener() {
@@ -158,7 +169,7 @@ public class BlogFragment extends Fragment {
                     Toast.makeText(requireContext(), "Empty comment.", Toast.LENGTH_SHORT).show();
                 } else {
                     // save comment to db
-                    saveCommentToDB(commentInput.getText().toString(), adapter);
+                    saveCommentToDB(commentInput.getText().toString(), commentAdapter);
                 }
             }
         });
@@ -218,7 +229,7 @@ public class BlogFragment extends Fragment {
 
                 // updating comments
                 sortCommentsByDate(comments, true);
-                adapter.reload();
+                commentAdapter.reload();
             }
         });
 
@@ -235,7 +246,7 @@ public class BlogFragment extends Fragment {
 
                 // updating comments
                 sortCommentsByDate(comments, false);
-                adapter.reload();
+                commentAdapter.reload();
             }
         });
 
