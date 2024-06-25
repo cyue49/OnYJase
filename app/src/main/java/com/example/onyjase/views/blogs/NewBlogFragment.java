@@ -6,12 +6,12 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,18 +23,16 @@ import android.widget.Toast;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentNewBlogBinding;
 import com.example.onyjase.models.Blog;
-import com.example.onyjase.utils.ImageHelper;
+import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.IOException;
+import java.util.Date;
 import java.util.UUID;
 
 // Fragment for the page for creating a new blog
@@ -52,11 +50,11 @@ public class NewBlogFragment extends Fragment {
     // firebase firestore
     FirebaseFirestore db;
 
-    // firebase auth
-    FirebaseAuth mAuth;
-
     // firebase storage
     FirebaseStorage storage;
+
+    // view model
+    AppViewModel viewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,9 +79,9 @@ public class NewBlogFragment extends Fragment {
         contentInput = binding.content;
         selectImgBtn = binding.selectImgBtn;
         selectImgBox = binding.selectedImg;
-        mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
+        viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         // cancel button
         cancelBtn.setOnClickListener(new View.OnClickListener() {
@@ -151,6 +149,7 @@ public class NewBlogFragment extends Fragment {
             }
             );
 
+    // go to another fragment
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = getParentFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -160,9 +159,10 @@ public class NewBlogFragment extends Fragment {
 
     // save blog to db
     private void saveBlogToDB(String title, String content) {
-        String userID = mAuth.getCurrentUser().getUid();
+        String userID = viewModel.getUser().getValue().getUserID();
         String blogID = UUID.randomUUID().toString().replace("-", "");
-        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID);
+        Date dateTime = new Date();
+        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID, 0, dateTime);
 
         db.collection("blogs")
                 .document(blogID)
@@ -191,6 +191,9 @@ public class NewBlogFragment extends Fragment {
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 // toast success message
                 Toast.makeText(requireContext(), "New blog posted.", Toast.LENGTH_SHORT).show();
+
+                // update view model current blog
+                viewModel.setCurrentBlogID(blogID);
 
                 // go to blog page
                 loadFragment(new BlogFragment());

@@ -66,4 +66,8 @@ public class Notification {
     public void setType(String type) {
         this.type = type;
     }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
 }

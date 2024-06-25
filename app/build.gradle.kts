@@ -54,4 +54,7 @@ dependencies {
     // navigation
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+
+    // glide
+    implementation(libs.glide)
 }

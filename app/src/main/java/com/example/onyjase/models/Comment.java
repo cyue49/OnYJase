@@ -10,14 +10,15 @@ public class Comment {
     private String blogID;
     private String content;
     private String stickerURL;
-    private @ServerTimestamp Date timestamp;
+    private Date timestamp;
     // constructor
-    public Comment(String commentID, String userID, String blogID, String content, String stickerURL) {
+    public Comment(String commentID, String userID, String blogID, String content, String stickerURL, Date timestamp) {
         this.commentID = commentID;
         this.userID = userID;
         this.blogID = blogID;
         this.content = content;
         this.stickerURL = stickerURL;
+        this.timestamp = timestamp;
     }
 
     // getters
@@ -64,5 +65,9 @@ public class Comment {
 
     public void setStickerURL(String stickerURL) {
         this.stickerURL = stickerURL;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 }
