@@ -84,6 +84,9 @@ public class BlogFragment extends Fragment {
     // list of stickers when searching up stickers
     ArrayList<Sticker> stickers;
 
+    // url of currently selected sticker
+    String selectedStickerUrl = "";
+
     // view model
     AppViewModel viewModel;
 
@@ -171,6 +174,7 @@ public class BlogFragment extends Fragment {
             @Override
             public void onClickSticker(String url) {
                 Glide.with(requireContext()).load(url).into(selectedSticker);
+                selectedStickerUrl = url;
             }
         });
         stickersList.setAdapter(stickerAdapter);
@@ -294,6 +298,9 @@ public class BlogFragment extends Fragment {
     // clear all inputs
     private void clearInputs() {
         commentInput.setText("");
+        stickerInput.setText("");
+        selectedStickerUrl = "";
+        selectedSticker.setImageResource(R.drawable.gray_rectangle);
     }
 
     // go to another fragment
@@ -419,7 +426,7 @@ public class BlogFragment extends Fragment {
         String blogID = viewModel.getCurrentBlogID().getValue();
         Date dateTime = new Date();
 
-        Comment comment = new Comment(commentID, userID, blogID, content, "", dateTime);
+        Comment comment = new Comment(commentID, userID, blogID, content, selectedStickerUrl, dateTime);
 
         db.collection("comments")
                 .document(commentID)
