@@ -78,6 +78,10 @@ public class BlogFragment extends Fragment {
     RecyclerView commentList, stickersList;
     ScrollView blogContent;
 
+    // recycle view adapters
+    CommentAdapter commentAdapter;
+    StickerAdapter stickerAdapter;
+
     // list of all comments for the blog
     LinkedList<Comment> comments;
 
@@ -161,7 +165,7 @@ public class BlogFragment extends Fragment {
 
         // setting adapter for comments recycle view
         commentList.setLayoutManager(new LinearLayoutManager(getContext()));
-        CommentAdapter commentAdapter = new CommentAdapter(comments, getContext(), db);
+        commentAdapter = new CommentAdapter(comments, getContext(), db);
         commentList.setAdapter(commentAdapter);
 
         // set all comments for current blog
@@ -169,7 +173,7 @@ public class BlogFragment extends Fragment {
 
         // setting adapter for stickers recycle view
         stickersList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        StickerAdapter stickerAdapter = new StickerAdapter(stickers, getContext());
+        stickerAdapter = new StickerAdapter(stickers, getContext());
         stickerAdapter.setOnStickersClickListener(new StickerAdapter.OnStickersClickListener() { // set listener
             @Override
             public void onClickSticker(String url) {
@@ -274,6 +278,7 @@ public class BlogFragment extends Fragment {
             public void onClick(View v) {
                 if (stickerDisplay.getVisibility() == View.VISIBLE) {
                     stickerDisplay.setVisibility(View.GONE);
+                    clearStickerSelection();
                 } else {
                     stickerDisplay.setVisibility(View.VISIBLE);
                 }
@@ -298,9 +303,16 @@ public class BlogFragment extends Fragment {
     // clear all inputs
     private void clearInputs() {
         commentInput.setText("");
+        clearStickerSelection();
+    }
+
+    // clear sticker selection
+    private void clearStickerSelection() {
         stickerInput.setText("");
         selectedStickerUrl = "";
         selectedSticker.setImageResource(R.drawable.gray_rectangle);
+        stickers.clear();
+        stickerAdapter.reload();
     }
 
     // go to another fragment
