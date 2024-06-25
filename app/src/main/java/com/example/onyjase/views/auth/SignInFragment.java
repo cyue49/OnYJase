@@ -55,9 +55,9 @@ public class SignInFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         navController = Navigation.findNavController(view);
 
-        userSignInBtn = binding.tempUserSignInBtn;
-        adminSignInBtn = binding.tempAdminSignInBtn;
-        toSignUpBtn = binding.toSignUpBtn;
+        userSignInBtn = binding.button;
+        toSignUpBtn = binding.button2;
+        adminSignInBtn = binding.button3;
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
         mAuth = FirebaseAuth.getInstance();
 
