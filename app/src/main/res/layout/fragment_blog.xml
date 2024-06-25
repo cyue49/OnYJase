@@ -21,46 +21,66 @@
         app:layout_constraintTop_toTopOf="parent"
         android:background="@color/subBlue">
 
-        <ImageView
+        <LinearLayout
             android:id="@+id/backBtn"
-            android:layout_width="20dp"
-            android:layout_height="25dp"
-            android:layout_marginStart="20dp"
-            android:contentDescription="back button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center"
             android:clickable="true"
-            android:focusable="true"
-            android:src="@drawable/back_icon" />
+            android:focusable="true" >
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="25dp"
+                android:contentDescription="back button"
+                android:src="@drawable/back_icon" />
+        </LinearLayout>
 
         <View
             android:layout_width = "0dp"
             android:layout_height = "wrap_content"
             android:layout_weight = "1"/>
 
-        <ImageView
+        <LinearLayout
             android:id="@+id/editBtn"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_marginEnd="20dp"
-            android:contentDescription="edit button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
             android:visibility="invisible"
+            android:gravity="center"
             android:clickable="true"
-            android:focusable="true"
-            android:src="@drawable/edit_icon" />
+            android:focusable="true" >
 
-        <ImageView
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:contentDescription="edit button"
+                android:src="@drawable/edit_icon" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/deleteBtn"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_marginEnd="20dp"
-            android:contentDescription="delete button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
             android:visibility="invisible"
+            android:gravity="center"
             android:clickable="true"
-            android:focusable="true"
-            android:src="@drawable/delete_icon" />
+            android:focusable="true" >
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:contentDescription="delete button"
+                android:src="@drawable/delete_icon" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <!-- Blog Content -->
     <ScrollView
+        android:id="@+id/blogContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="0dp"
@@ -138,14 +158,22 @@
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
-                <ImageView
+                <LinearLayout
                     android:id="@+id/likeBtn"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
                     android:clickable="true"
-                    android:contentDescription="heart button"
-                    android:focusable="true"
-                    android:src="@drawable/gray_heart" />
+                    android:focusable="true" >
+
+                    <ImageView
+                        android:id="@+id/likeIcon"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:contentDescription="heart button"
+                        android:src="@drawable/gray_heart" />
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -214,6 +242,101 @@
                 android:layout_height="wrap_content"
                 android:fitsSystemWindows="true">
 
+                <!-- sticker display -->
+                <LinearLayout
+                    android:id="@+id/stickerDisplay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:background="@drawable/blue_rectangle_border"
+                    android:padding="20dp"
+                    android:orientation="vertical">
+
+                    <!--sticker search box -->
+                    <LinearLayout
+                        android:id="@+id/stickerSearch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical" >
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/stickerSearchBox"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight = "1"
+                            android:hint="Search for stickers"
+                            android:padding="3dp"
+                            android:background="@color/white"
+                            app:boxBackgroundColor="@color/white"
+                            app:boxBackgroundMode="outline"
+                            app:boxCornerRadiusBottomEnd="30dp"
+                            app:boxCornerRadiusBottomStart="30dp"
+                            app:boxCornerRadiusTopEnd="30dp"
+                            app:boxCornerRadiusTopStart="30dp"
+                            app:boxStrokeColor="@color/subBlue"
+                            app:endIconTint="@color/subBlue"
+                            app:hintTextColor="@color/subBlue"
+                            app:startIconTint="@color/subBlue">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/stickerSearchInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="top"
+                                android:textColorLink="@color/subBlue"
+                                tools:ignore="KeyboardInaccessibleWidget" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <LinearLayout
+                            android:id="@+id/stickerSearchBtn"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true" >
+
+                            <ImageView
+                                android:layout_width="35dp"
+                                android:layout_height="35dp"
+                                android:contentDescription="sticker search button"
+                                android:src="@drawable/search_icon" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- selected sticker & sticker list -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_below="@+id/stickerSearch">
+
+                        <ImageView
+                            android:id="@+id/selectedSticker"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:contentDescription="selected sticker"
+                            android:src="@drawable/gray_rectangle" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginHorizontal="10dp"
+                            android:background="@color/subBlue"/>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/stickersList"
+                            android:layout_width="wrap_content"
+                            android:layout_height="60dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- comment box -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/commentBox"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -231,7 +354,8 @@
                     app:boxStrokeColor="@color/subBlue"
                     app:endIconTint="@color/subBlue"
                     app:hintTextColor="@color/subBlue"
-                    app:startIconTint="@color/subBlue">
+                    app:startIconTint="@color/subBlue"
+                    android:layout_below="@+id/stickerDisplay">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/commentInput"
@@ -243,6 +367,7 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- buttons under comment box -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -251,11 +376,29 @@
                     android:gravity="center_vertical"
                     android:layout_below="@+id/commentBox" >
 
+                    <!-- sticker button -->
+                    <LinearLayout
+                        android:id="@+id/stickerBtn"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true" >
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:contentDescription="sticker button"
+                            android:src="@drawable/sticker_icon" />
+                    </LinearLayout>
+
                     <View
                         android:layout_width = "0dp"
                         android:layout_height = "wrap_content"
                         android:layout_weight = "1"/>
 
+                    <!-- clear comment box button -->
                     <Button
                         android:id="@+id/clearBtn"
                         android:layout_width="wrap_content"
@@ -265,6 +408,7 @@
                         android:text="Clear"
                         android:textColor="@color/black" />
 
+                    <!-- submit comment button -->
                     <Button
                         android:id="@+id/submitBtn"
                         android:layout_width="wrap_content"
@@ -279,6 +423,59 @@
                 android:layout_width = "match_parent"
                 android:layout_height = "3dp"
                 android:background="@color/subBlue"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginVertical="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/subBlue"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:text="Sort by: "/>
+
+                <View
+                    android:layout_width = "0dp"
+                    android:layout_height = "wrap_content"
+                    android:layout_weight = "1"/>
+
+                <TextView
+                    android:id="@+id/newestBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/subBlue"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:background="@drawable/blue_rectangle_border"
+                    android:paddingVertical="3dp"
+                    android:paddingHorizontal="10dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="Newest"/>
+
+                <TextView
+                    android:id="@+id/oldestBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/subBlue"
+                    android:alpha="0.5"
+                    android:textStyle="normal"
+                    android:textSize="16sp"
+                    android:background="@drawable/blue_rectangle_border"
+                    android:paddingVertical="3dp"
+                    android:paddingHorizontal="10dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="Oldest"/>
+
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/commentsList"

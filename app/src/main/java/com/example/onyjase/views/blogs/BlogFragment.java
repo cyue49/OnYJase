@@ -1,6 +1,7 @@
 package com.example.onyjase.views.blogs;
 
 import android.annotation.SuppressLint;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -17,6 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +27,6 @@ import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.adapters.CommentAdapter;
 import com.example.onyjase.databinding.FragmentBlogBinding;
-import com.example.onyjase.models.Blog;
 import com.example.onyjase.models.Comment;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -55,14 +57,19 @@ public class BlogFragment extends Fragment {
     FragmentBlogBinding binding;
 
     // ui components variables
-    ImageView backBtn, editBtn, deleteBtn, likeBtn, coverImg;
-    TextView titleTxt, dateTimeTxt, authorTxt, contentTxt, likesTxt, commentsCount;
-    TextInputEditText commentInput;
+    ImageView likeIcon, coverImg, selectedSticker;
+    TextView titleTxt, dateTimeTxt, authorTxt, contentTxt, likesTxt, commentsCount, newestBtn, oldestBtn;
+    TextInputEditText commentInput, stickerInput;
     Button clearBtn, submitBtn;
-    RecyclerView commentList;
+    LinearLayout likeBtn, backBtn, editBtn, deleteBtn, stickerBtn, stickerDisplay, stickerSearchBtn;
+    RecyclerView commentList, stickersList;
+    ScrollView blogContent;
 
     // list of all comments for the blog
     LinkedList<Comment> comments;
+
+    // list of stickers when searching up stickers
+    // todo
 
     // view model
     AppViewModel viewModel;
@@ -93,6 +100,7 @@ public class BlogFragment extends Fragment {
         backBtn = binding.backBtn;
         editBtn = binding.editBtn;
         deleteBtn = binding.deleteBtn;
+        likeIcon = binding.likeIcon;
         likeBtn = binding.likeBtn;
         titleTxt = binding.title;
         dateTimeTxt = binding.dateTime;
@@ -104,21 +112,33 @@ public class BlogFragment extends Fragment {
         commentInput = binding.commentInput;
         clearBtn = binding.clearBtn;
         submitBtn = binding.submitBtn;
+        newestBtn = binding.newestBtn;
+        oldestBtn = binding.oldestBtn;
         commentList = binding.commentsList;
+        stickerBtn = binding.stickerBtn;
+        stickerDisplay = binding.stickerDisplay;
+        selectedSticker = binding.selectedSticker;
+        stickersList = binding.stickersList;
+        stickerInput = binding.stickerSearchInput;
+        stickerSearchBtn = binding.stickerSearchBtn;
+        blogContent = binding.blogContent;
         comments = new LinkedList<>();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
+        blogContent.setVisibility(View.INVISIBLE);
+
         // display content from current blog of view model
         String currentBlogID = viewModel.getCurrentBlogID().getValue();
         if (currentBlogID != null) {
-            // set like icon depending on if current user has previously like current blog
-            setLikeIcon(currentBlogID);
-
             // set title, content, date, likes, author, and cover image
             setBlogContent(currentBlogID);
+
+            // set like icon depending on if current user has previously like current blog
+            setLikeIcon(currentBlogID);
         } else {
+            Toast.makeText(requireContext(), "Error fetching blog.", Toast.LENGTH_SHORT).show();
             loadFragment(new BlogsFeedFragment());
         }
 
@@ -172,6 +192,7 @@ public class BlogFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // todo
+                Toast.makeText(requireContext(), "Edit clicked.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -180,9 +201,67 @@ public class BlogFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // todo
+                Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // sort comments by newest button
+        newestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // updating buttons ui
+                newestBtn.setTypeface(newestBtn.getTypeface(), Typeface.BOLD);
+                newestBtn.setAlpha(1.0f);
+
+                oldestBtn.setTypeface(oldestBtn.getTypeface(), Typeface.NORMAL);
+                oldestBtn.setAlpha(0.5f);
+
+                // updating comments
+                sortCommentsByDate(comments, true);
+                adapter.reload();
+            }
+        });
+
+        // sort comments by oldest button
+        oldestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // updating buttons ui
+                oldestBtn.setTypeface(oldestBtn.getTypeface(), Typeface.BOLD);
+                oldestBtn.setAlpha(1.0f);
+
+                newestBtn.setTypeface(newestBtn.getTypeface(), Typeface.NORMAL);
+                newestBtn.setAlpha(0.5f);
+
+                // updating comments
+                sortCommentsByDate(comments, false);
+                adapter.reload();
+            }
+        });
+
+        // sticker button
+        stickerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (stickerDisplay.getVisibility() == View.VISIBLE) {
+                    stickerDisplay.setVisibility(View.GONE);
+                } else {
+                    stickerDisplay.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        // search sticker button
+        stickerSearchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // todo
+                Toast.makeText(requireContext(), "Sticker search clicked.", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
+    // =============================================== Functions ===============================================
 
     // clear all inputs
     private void clearInputs() {
@@ -225,6 +304,7 @@ public class BlogFragment extends Fragment {
                         Glide.with(requireContext())
                                 .load(uri)
                                 .into(coverImg);
+                        blogContent.setVisibility(View.VISIBLE);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -256,7 +336,7 @@ public class BlogFragment extends Fragment {
 
                                 Comment comment = new Comment(commentID, userID, blogId, content, stickerURL, timestamp);
                                 comments.add(comment);
-                                sortCommentsByDate(comments);
+                                sortCommentsByDate(comments, true);
                                 count++;
                             }
                             adapter.reload();
@@ -298,6 +378,7 @@ public class BlogFragment extends Fragment {
                     }
                 } else {
                     Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
+                    loadFragment(new BlogsFeedFragment());
                 }
             }
         });
@@ -336,12 +417,12 @@ public class BlogFragment extends Fragment {
     }
 
     // sort list of comments by date
-    private void sortCommentsByDate(LinkedList<Comment> comments) {
+    private void sortCommentsByDate(LinkedList<Comment> comments, Boolean newestFirst) {
         comments.sort(new Comparator<Comment>() {
             @Override
             public int compare(Comment o1, Comment o2) {
                 if (o1.getTimestamp().equals(o2.getTimestamp())) return 0;
-                return o1.getTimestamp().compareTo(o2.getTimestamp()) * -1;
+                return newestFirst ? o1.getTimestamp().compareTo(o2.getTimestamp()) * -1 : o1.getTimestamp().compareTo(o2.getTimestamp());
             }
         });
     }
@@ -359,9 +440,9 @@ public class BlogFragment extends Fragment {
                             if (document.exists()) {
                                 List<String> userLikes = (List<String>) document.get("favorites");
                                 if (userLikes.contains(blogID)) {
-                                    likeBtn.setImageResource(R.drawable.blue_heart);
+                                    likeIcon.setImageResource(R.drawable.blue_heart);
                                 } else {
-                                    likeBtn.setImageResource(R.drawable.gray_heart);
+                                    likeIcon.setImageResource(R.drawable.gray_heart);
                                 }
                             }
                         } else {
@@ -419,8 +500,6 @@ public class BlogFragment extends Fragment {
                 }
             }
         });
-
-
     }
 
     // update likes count for current blog when clicking like
@@ -442,7 +521,7 @@ public class BlogFragment extends Fragment {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         // update ui
-                                        likeBtn.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
+                                        likeIcon.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
                                         likesTxt.setText(String.valueOf(isAdd ? curLikes+1 : curLikes-1));
                                     } else {
                                         Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
