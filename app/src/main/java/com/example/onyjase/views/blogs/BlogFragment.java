@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,7 @@ public class BlogFragment extends Fragment {
     Button clearBtn, submitBtn;
     LinearLayout likeBtn, backBtn, editBtn, deleteBtn, stickerBtn, stickerDisplay, stickerSearchBtn;
     RecyclerView commentList, stickersList;
+    ScrollView blogContent;
 
     // list of all comments for the blog
     LinkedList<Comment> comments;
@@ -119,10 +121,13 @@ public class BlogFragment extends Fragment {
         stickersList = binding.stickersList;
         stickerInput = binding.stickerSearchInput;
         stickerSearchBtn = binding.stickerSearchBtn;
+        blogContent = binding.blogContent;
         comments = new LinkedList<>();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
+
+        blogContent.setVisibility(View.INVISIBLE);
 
         // display content from current blog of view model
         String currentBlogID = viewModel.getCurrentBlogID().getValue();
@@ -299,6 +304,7 @@ public class BlogFragment extends Fragment {
                         Glide.with(requireContext())
                                 .load(uri)
                                 .into(coverImg);
+                        blogContent.setVisibility(View.VISIBLE);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

@@ -80,6 +80,7 @@
 
     <!-- Blog Content -->
     <ScrollView
+        android:id="@+id/blogContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="0dp"
@@ -323,8 +324,8 @@
                             android:src="@drawable/gray_rectangle" />
 
                         <View
-                            android:layout_width = "2dp"
-                            android:layout_height = "match_parent"
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
                             android:layout_marginHorizontal="10dp"
                             android:background="@color/subBlue"/>
 
