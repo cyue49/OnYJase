@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class StickerAdapter extends RecyclerView.Adapter<StickerAdapter.StickerViewHolder> {
     ArrayList<Sticker> stickers;
     Context context;
+    OnStickersClickListener stickersClickListener;
 
     public StickerAdapter(ArrayList<Sticker> stickers, Context context) {
         super();
@@ -37,9 +38,17 @@ public class StickerAdapter extends RecyclerView.Adapter<StickerAdapter.StickerV
     @Override
     public void onBindViewHolder(@NonNull StickerViewHolder holder, int position) {
         Sticker sticker = stickers.get(position);
+        // get sticker url
         String stickerURL = sticker.getImages().getOriginal().getUrl();
+        // load into image view
         Glide.with(context).load(stickerURL).into(holder.stickerItem);
-        // todo: add on click listener
+        // set click listener for each sticker
+        holder.stickerItem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stickersClickListener.onClickSticker(stickerURL);
+            }
+        });
     }
 
     @Override
@@ -61,5 +70,15 @@ public class StickerAdapter extends RecyclerView.Adapter<StickerAdapter.StickerV
             super(view);
             stickerItem = view.findViewById(R.id.stickerItem);
         }
+    }
+
+    // on click listener for clicking on each sticker
+    public interface OnStickersClickListener {
+        void onClickSticker(String url);
+    }
+
+    // set listener
+    public void setOnStickersClickListener(OnStickersClickListener listener) {
+        this.stickersClickListener = listener;
     }
 }

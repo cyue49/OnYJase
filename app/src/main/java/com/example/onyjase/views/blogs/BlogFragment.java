@@ -159,6 +159,12 @@ public class BlogFragment extends Fragment {
         // setting adapter for stickers recycle view
         stickersList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         StickerAdapter stickerAdapter = new StickerAdapter(stickers, getContext());
+        stickerAdapter.setOnStickersClickListener(new StickerAdapter.OnStickersClickListener() { // set listener
+            @Override
+            public void onClickSticker(String url) {
+                Glide.with(requireContext()).load(url).into(selectedSticker);
+            }
+        });
         stickersList.setAdapter(stickerAdapter);
 
         // submit comment button
