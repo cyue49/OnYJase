@@ -26,8 +26,14 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.adapters.CommentAdapter;
+import com.example.onyjase.adapters.StickerAdapter;
 import com.example.onyjase.databinding.FragmentBlogBinding;
 import com.example.onyjase.models.Comment;
+import com.example.onyjase.models.stickers.Sticker;
+import com.example.onyjase.models.stickers.StickerImage;
+import com.example.onyjase.models.stickers.StickerImages;
+import com.example.onyjase.models.stickers.Stickers;
+import com.example.onyjase.utils.StickersService;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -46,11 +52,18 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 // Fragment for a single blog
 public class BlogFragment extends Fragment {
@@ -65,11 +78,18 @@ public class BlogFragment extends Fragment {
     RecyclerView commentList, stickersList;
     ScrollView blogContent;
 
+    // recycle view adapters
+    CommentAdapter commentAdapter;
+    StickerAdapter stickerAdapter;
+
     // list of all comments for the blog
     LinkedList<Comment> comments;
 
     // list of stickers when searching up stickers
-    // todo
+    ArrayList<Sticker> stickers;
+
+    // url of currently selected sticker
+    String selectedStickerUrl = "";
 
     // view model
     AppViewModel viewModel;
@@ -123,6 +143,7 @@ public class BlogFragment extends Fragment {
         stickerSearchBtn = binding.stickerSearchBtn;
         blogContent = binding.blogContent;
         comments = new LinkedList<>();
+        stickers = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
@@ -144,11 +165,23 @@ public class BlogFragment extends Fragment {
 
         // setting adapter for comments recycle view
         commentList.setLayoutManager(new LinearLayoutManager(getContext()));
-        CommentAdapter adapter = new CommentAdapter(comments, getContext(), db);
-        commentList.setAdapter(adapter);
+        commentAdapter = new CommentAdapter(comments, getContext(), db);
+        commentList.setAdapter(commentAdapter);
 
         // set all comments for current blog
-        setAllBlogComments(currentBlogID, adapter);
+        setAllBlogComments(currentBlogID, commentAdapter);
+
+        // setting adapter for stickers recycle view
+        stickersList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        stickerAdapter = new StickerAdapter(stickers, getContext());
+        stickerAdapter.setOnStickersClickListener(new StickerAdapter.OnStickersClickListener() { // set listener
+            @Override
+            public void onClickSticker(String url) {
+                Glide.with(requireContext()).load(url).into(selectedSticker);
+                selectedStickerUrl = url;
+            }
+        });
+        stickersList.setAdapter(stickerAdapter);
 
         // submit comment button
         submitBtn.setOnClickListener(new View.OnClickListener() {
@@ -158,7 +191,7 @@ public class BlogFragment extends Fragment {
                     Toast.makeText(requireContext(), "Empty comment.", Toast.LENGTH_SHORT).show();
                 } else {
                     // save comment to db
-                    saveCommentToDB(commentInput.getText().toString(), adapter);
+                    saveCommentToDB(commentInput.getText().toString(), commentAdapter);
                 }
             }
         });
@@ -218,7 +251,7 @@ public class BlogFragment extends Fragment {
 
                 // updating comments
                 sortCommentsByDate(comments, true);
-                adapter.reload();
+                commentAdapter.reload();
             }
         });
 
@@ -235,7 +268,7 @@ public class BlogFragment extends Fragment {
 
                 // updating comments
                 sortCommentsByDate(comments, false);
-                adapter.reload();
+                commentAdapter.reload();
             }
         });
 
@@ -245,6 +278,7 @@ public class BlogFragment extends Fragment {
             public void onClick(View v) {
                 if (stickerDisplay.getVisibility() == View.VISIBLE) {
                     stickerDisplay.setVisibility(View.GONE);
+                    clearStickerSelection();
                 } else {
                     stickerDisplay.setVisibility(View.VISIBLE);
                 }
@@ -255,8 +289,11 @@ public class BlogFragment extends Fragment {
         stickerSearchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo
-                Toast.makeText(requireContext(), "Sticker search clicked.", Toast.LENGTH_SHORT).show();
+                if (stickerInput.getText() == null || stickerInput.getText().toString().isEmpty()) {
+                    Toast.makeText(requireContext(), "Enter something to search for stickers.", Toast.LENGTH_SHORT).show();
+                } else {
+                    stickersApiCall(stickerAdapter, stickerInput.getText().toString());
+                }
             }
         });
     }
@@ -266,6 +303,16 @@ public class BlogFragment extends Fragment {
     // clear all inputs
     private void clearInputs() {
         commentInput.setText("");
+        clearStickerSelection();
+    }
+
+    // clear sticker selection
+    private void clearStickerSelection() {
+        stickerInput.setText("");
+        selectedStickerUrl = "";
+        selectedSticker.setImageResource(R.drawable.gray_rectangle);
+        stickers.clear();
+        stickerAdapter.reload();
     }
 
     // go to another fragment
@@ -391,7 +438,7 @@ public class BlogFragment extends Fragment {
         String blogID = viewModel.getCurrentBlogID().getValue();
         Date dateTime = new Date();
 
-        Comment comment = new Comment(commentID, userID, blogID, content, "", dateTime);
+        Comment comment = new Comment(commentID, userID, blogID, content, selectedStickerUrl, dateTime);
 
         db.collection("comments")
                 .document(commentID)
@@ -534,5 +581,57 @@ public class BlogFragment extends Fragment {
                     }
                 }
             });
+    }
+
+    // stickers api call
+    private void stickersApiCall(StickerAdapter adapter, String query) {
+        // getting the api key
+        DocumentReference docRef = db.collection("apis").document("giphy");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        String apiKey = document.getString("apiKey");
+
+                        // setting up api call
+                        Retrofit retrofit = new Retrofit.Builder()
+                                .baseUrl("https://api.giphy.com/v1/")
+                                .addConverterFactory(GsonConverterFactory.create())
+                                .build();
+
+                        StickersService stickersService = retrofit.create(StickersService.class);
+
+                        // making api call
+                        Call<Stickers> call = stickersService.getStickers(apiKey, query);
+
+                        // handling the response
+                        call.enqueue(new Callback<Stickers>() {
+                            @Override
+                            public void onResponse(Call<Stickers> call, Response<Stickers> response) {
+                                if (!response.isSuccessful() && response.body() == null) {
+                                    Toast.makeText(requireContext(), "Error fetching stickers.", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                Stickers responseStickers = response.body();
+                                if (responseStickers != null) {
+                                    stickers.clear();
+                                    stickers.addAll(responseStickers.getData());
+                                    adapter.reload();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Stickers> call, Throwable throwable) {
+                                Toast.makeText(requireContext(), "Error fetching stickers.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Error fetching stickers.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }
