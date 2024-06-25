@@ -56,15 +56,18 @@ public class BlogFragment extends Fragment {
     FragmentBlogBinding binding;
 
     // ui components variables
-    ImageView likeIcon, coverImg;
+    ImageView likeIcon, coverImg, selectedSticker;
     TextView titleTxt, dateTimeTxt, authorTxt, contentTxt, likesTxt, commentsCount, newestBtn, oldestBtn;
-    TextInputEditText commentInput;
+    TextInputEditText commentInput, stickerInput;
     Button clearBtn, submitBtn;
-    LinearLayout likeBtn, backBtn, editBtn, deleteBtn;
-    RecyclerView commentList;
+    LinearLayout likeBtn, backBtn, editBtn, deleteBtn, stickerBtn, stickerDisplay, stickerSearchBtn;
+    RecyclerView commentList, stickersList;
 
     // list of all comments for the blog
     LinkedList<Comment> comments;
+
+    // list of stickers when searching up stickers
+    // todo
 
     // view model
     AppViewModel viewModel;
@@ -110,6 +113,12 @@ public class BlogFragment extends Fragment {
         newestBtn = binding.newestBtn;
         oldestBtn = binding.oldestBtn;
         commentList = binding.commentsList;
+        stickerBtn = binding.stickerBtn;
+        stickerDisplay = binding.stickerDisplay;
+        selectedSticker = binding.selectedSticker;
+        stickersList = binding.stickersList;
+        stickerInput = binding.stickerSearchInput;
+        stickerSearchBtn = binding.stickerSearchBtn;
         comments = new LinkedList<>();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
@@ -224,7 +233,21 @@ public class BlogFragment extends Fragment {
                 adapter.reload();
             }
         });
+
+        // sticker button
+        stickerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (stickerDisplay.getVisibility() == View.VISIBLE) {
+                    stickerDisplay.setVisibility(View.GONE);
+                } else {
+                    stickerDisplay.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
+
+    // =============================================== Functions ===============================================
 
     // clear all inputs
     private void clearInputs() {
