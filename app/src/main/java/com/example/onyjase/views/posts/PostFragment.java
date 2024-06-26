@@ -109,8 +109,7 @@ public class PostFragment extends Fragment {
         editBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo
-                Toast.makeText(requireContext(), "Edit clicked.", Toast.LENGTH_SHORT).show();
+                loadFragment(new EditPostFragment());
             }
         });
 
