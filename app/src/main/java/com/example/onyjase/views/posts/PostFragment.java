@@ -94,6 +94,34 @@ public class PostFragment extends Fragment {
             Toast.makeText(requireContext(), "Error fetching post.", Toast.LENGTH_SHORT).show();
             loadFragment(new PostsFeedFragment());
         }
+
+        // =============================================== Buttons Listeners ===============================================
+
+        // back button
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadFragment(new PostsFeedFragment());
+            }
+        });
+
+        // edit button
+        editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // todo
+                Toast.makeText(requireContext(), "Edit clicked.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // delete button
+        deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // todo
+                Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     // =============================================== Functions ===============================================
