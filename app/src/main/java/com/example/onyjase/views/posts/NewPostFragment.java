@@ -1,4 +1,4 @@
-package com.example.onyjase.views.blogs;
+package com.example.onyjase.views.posts;
 
 import android.app.Activity;
 import android.content.Intent;

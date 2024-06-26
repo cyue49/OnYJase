@@ -26,7 +26,7 @@ import com.example.onyjase.databinding.FragmentAppBinding;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogsFeedFragment;
 import com.example.onyjase.views.blogs.NewBlogFragment;
-import com.example.onyjase.views.blogs.NewPostFragment;
+import com.example.onyjase.views.posts.NewPostFragment;
 import com.example.onyjase.views.notifications.NotificationsFragment;
 import com.example.onyjase.views.posts.PostsFeedFragment;
 import com.example.onyjase.views.user.UserProfileFragment;
