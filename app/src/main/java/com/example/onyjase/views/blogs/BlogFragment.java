@@ -129,8 +129,11 @@ public class BlogFragment extends Fragment {
         // display content from current blog of view model
         String currentBlogID = viewModel.getCurrentBlogID().getValue();
         if (currentBlogID != null) {
-            // set title, content, date, likes, author, and cover image
+            // set title, content, date, likes, and author
             setBlogContent(currentBlogID);
+
+            // set blog cover image
+            setBlogCoverImage("blogs/" + currentBlogID);
 
             // set like icon depending on if current user has previously like current blog
             setLikeIcon(currentBlogID);
@@ -187,6 +190,41 @@ public class BlogFragment extends Fragment {
         transaction.commit();
     }
 
+    // set the title, content, date, and number of likes for the current blog
+    private void setBlogContent(String blogID) {
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()){
+                        // show edit & delete button if user is current blog author
+                        if (viewModel.getUser().getValue().getUserID().equals(document.getString("userID"))) {
+                            editBtn.setVisibility(View.VISIBLE);
+                            deleteBtn.setVisibility(View.VISIBLE);
+                        }
+
+                        // set author username
+                        setBlogUserName(document.getString("userID"));
+
+                        // set title, content, date, and number of likes
+                        titleTxt.setText(document.getString("title"));
+                        contentTxt.setText(document.getString("content"));
+                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        dateTimeTxt.setText(formatter.format(document.getTimestamp("timestamp").toDate()));
+                        likesTxt.setText(String.valueOf(document.getDouble("likes").intValue()));
+
+                        blogContent.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
+                    loadFragment(new BlogsFeedFragment());
+                }
+            }
+        });
+    }
+
     // set the username for the author of current blog
     private void setBlogUserName(String userID) {
         DocumentReference docRef = db.collection("users").document(userID);
@@ -215,7 +253,6 @@ public class BlogFragment extends Fragment {
                         Glide.with(requireContext())
                                 .load(uri)
                                 .into(coverImg);
-                        blogContent.setVisibility(View.VISIBLE);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -224,42 +261,6 @@ public class BlogFragment extends Fragment {
                         Toast.makeText(requireContext(), "Error getting blog cover image.", Toast.LENGTH_SHORT).show();
                     }
                 });
-    }
-
-    // set the title, content, date, and number of likes for the current blog
-    private void setBlogContent(String blogID) {
-        DocumentReference docRef = db.collection("blogs").document(blogID);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()){
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()){
-                        // show edit & delete button if user is current blog author
-                        if (viewModel.getUser().getValue().getUserID().equals(document.getString("userID"))) {
-                            editBtn.setVisibility(View.VISIBLE);
-                            deleteBtn.setVisibility(View.VISIBLE);
-                        }
-
-                        // set blog cover image
-                        setBlogCoverImage(document.getString("imageURL"));
-
-                        // set author username
-                        setBlogUserName(document.getString("userID"));
-
-                        // set title, content, date, and number of likes
-                        titleTxt.setText(document.getString("title"));
-                        contentTxt.setText(document.getString("content"));
-                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                        dateTimeTxt.setText(formatter.format(document.getTimestamp("timestamp").toDate()));
-                        likesTxt.setText(String.valueOf(document.getDouble("likes").intValue()));
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
-                    loadFragment(new BlogsFeedFragment());
-                }
-            }
-        });
     }
 
     // set blog like icon depending on if current user like it or not
