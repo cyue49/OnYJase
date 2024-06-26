@@ -28,6 +28,7 @@ import com.example.onyjase.R;
 import com.example.onyjase.adapters.CommentAdapter;
 import com.example.onyjase.adapters.StickerAdapter;
 import com.example.onyjase.databinding.FragmentBlogBinding;
+import com.example.onyjase.models.Blog;
 import com.example.onyjase.models.Comment;
 import com.example.onyjase.models.stickers.Sticker;
 import com.example.onyjase.models.stickers.StickerImage;
@@ -67,32 +68,21 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 // Fragment for a single blog
 public class BlogFragment extends Fragment {
-    FragmentBlogBinding binding;
-
-    // ui components variables
-    ImageView likeIcon, coverImg;
-    TextView titleTxt, dateTimeTxt, authorTxt, contentTxt, likesTxt;
-    LinearLayout likeBtn, backBtn, editBtn, deleteBtn;
-    ScrollView blogContent;
+    private FragmentBlogBinding binding;
 
     // view model
-    AppViewModel viewModel;
+    private AppViewModel viewModel;
 
     // firebase firestore
-    FirebaseFirestore db;
+    private FirebaseFirestore db;
 
     // firebase storage
-    FirebaseStorage storage;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+    private FirebaseStorage storage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentBlogBinding.inflate(inflater,container,false);
+        binding = FragmentBlogBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -106,75 +96,39 @@ public class BlogFragment extends Fragment {
         transaction.replace(R.id.commentSection, new CommentsFragment());
         transaction.commit();
 
-        // initializing variables
-        backBtn = binding.backBtn;
-        editBtn = binding.editBtn;
-        deleteBtn = binding.deleteBtn;
-        likeIcon = binding.likeIcon;
-        likeBtn = binding.likeBtn;
-        titleTxt = binding.title;
-        dateTimeTxt = binding.dateTime;
-        authorTxt = binding.username;
-        contentTxt = binding.content;
-        likesTxt = binding.likes;
-        coverImg = binding.coverImage;
-        blogContent = binding.blogContent;
+        // Initialize Firestore and Storage
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
-        // initially set blog content to invisible until fetched content from db
-        blogContent.setVisibility(View.INVISIBLE);
+        // Initially set blog content to invisible until fetched content from db
+        binding.blogContent.setVisibility(View.INVISIBLE);
 
-        // display content from current blog of view model
-        String currentBlogID = viewModel.getCurrentBlogID().getValue();
-        if (currentBlogID != null) {
-            // set title, content, date, likes, author, and cover image
-            setBlogContent(currentBlogID);
+        // Display content from current blog of view model
+        viewModel.getCurrentBlog().observe(getViewLifecycleOwner(), this::setBlogContent);
 
-            // set like icon depending on if current user has previously like current blog
-            setLikeIcon(currentBlogID);
-        } else {
-            Toast.makeText(requireContext(), "Error fetching blog.", Toast.LENGTH_SHORT).show();
-            loadFragment(new BlogsFeedFragment());
-        }
-
-        // =============================================== Buttons Listeners ===============================================
-
-        // likes button
-        likeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateBlogLikes(currentBlogID);
+        // Likes button listener
+        binding.likeBtn.setOnClickListener(v -> {
+            Blog currentBlog = viewModel.getCurrentBlog().getValue();
+            if (currentBlog != null) {
+                updateBlogLikes(currentBlog.getBlogID());
             }
         });
 
-        // back button
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new BlogsFeedFragment());
-            }
+        // Back button listener
+        binding.backBtn.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+
+        // Edit button listener
+        binding.editBtn.setOnClickListener(v -> {
+            // TODO: Handle edit blog action
+            Toast.makeText(requireContext(), "Edit clicked.", Toast.LENGTH_SHORT).show();
         });
 
-        // edit button
-        editBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // todo
-                Toast.makeText(requireContext(), "Edit clicked.", Toast.LENGTH_SHORT).show();
-            }
+        // Delete button listener
+        binding.deleteBtn.setOnClickListener(v -> {
+            // TODO: Handle delete blog action
+            Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
         });
-
-        // delete button
-        deleteBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // todo
-                Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
     }
 
     // =============================================== Functions ===============================================
@@ -183,108 +137,78 @@ public class BlogFragment extends Fragment {
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = getParentFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
+        transaction.replace(R.id.fragmentContainerView, fragment);
         transaction.commit();
     }
 
     // set the username for the author of current blog
     private void setBlogUserName(String userID) {
         DocumentReference docRef = db.collection("users").document(userID);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        authorTxt.setText(document.getString("username"));
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Error getting blog author.", Toast.LENGTH_SHORT).show();
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    binding.username.setText(document.getString("username"));
                 }
+            } else {
+                Toast.makeText(requireContext(), "Error getting blog author.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     // set the cover image for the current blog
-    private void setBlogCoverImage(String imageURL){
+    private void setBlogCoverImage(String imageURL) {
         StorageReference storageRef = storage.getReference();
         storageRef.child(imageURL).getDownloadUrl()
-                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        Glide.with(requireContext())
-                                .load(uri)
-                                .into(coverImg);
-                        blogContent.setVisibility(View.VISIBLE);
-                    }
+                .addOnSuccessListener(uri -> {
+                    Glide.with(requireContext())
+                            .load(uri)
+                            .into(binding.coverImage);
+                    binding.blogContent.setVisibility(View.VISIBLE);
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(requireContext(), "Error getting blog cover image.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error getting blog cover image.", Toast.LENGTH_SHORT).show());
     }
 
     // set the title, content, date, and number of likes for the current blog
-    private void setBlogContent(String blogID) {
-        DocumentReference docRef = db.collection("blogs").document(blogID);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()){
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()){
-                        // show edit & delete button if user is current blog author
-                        if (viewModel.getUser().getValue().getUserID().equals(document.getString("userID"))) {
-                            editBtn.setVisibility(View.VISIBLE);
-                            deleteBtn.setVisibility(View.VISIBLE);
-                        }
+    @SuppressLint("SimpleDateFormat")
+    private void setBlogContent(Blog blog) {
+        if (blog == null) return;
 
-                        // set blog cover image
-                        setBlogCoverImage(document.getString("imageURL"));
+        if (viewModel.getUser().getValue().getUserID().equals(blog.getUserID())) {
+            binding.editBtn.setVisibility(View.VISIBLE);
+            binding.deleteBtn.setVisibility(View.VISIBLE);
+        }
 
-                        // set author username
-                        setBlogUserName(document.getString("userID"));
+        setBlogCoverImage(blog.getImageURL());
+        setBlogUserName(blog.getUserID());
 
-                        // set title, content, date, and number of likes
-                        titleTxt.setText(document.getString("title"));
-                        contentTxt.setText(document.getString("content"));
-                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                        dateTimeTxt.setText(formatter.format(document.getTimestamp("timestamp").toDate()));
-                        likesTxt.setText(String.valueOf(document.getDouble("likes").intValue()));
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
-                    loadFragment(new BlogsFeedFragment());
-                }
-            }
-        });
+        binding.title.setText(blog.getTitle());
+        binding.content.setText(blog.getContent());
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        binding.dateTime.setText(formatter.format(blog.getTimestamp()));
+        binding.likes.setText(String.valueOf(blog.getLikes()));
+
+        setLikeIcon(blog.getBlogID());
     }
 
     // set blog like icon depending on if current user like it or not
     private void setLikeIcon(String blogID) {
         String userID = viewModel.getUser().getValue().getUserID();
-        db.collection("users")
-                .document(userID)
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                List<String> userLikes = (List<String>) document.get("favorites");
-                                if (userLikes.contains(blogID)) {
-                                    likeIcon.setImageResource(R.drawable.blue_heart);
-                                } else {
-                                    likeIcon.setImageResource(R.drawable.gray_heart);
-                                }
-                            }
-                        } else {
-                            Toast.makeText(requireContext(), "Error updating likes.", Toast.LENGTH_SHORT).show();
-                        }
+        db.collection("users").document(userID).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    List<String> userLikes = (List<String>) document.get("favorites");
+                    if (userLikes != null && userLikes.contains(blogID)) {
+                        binding.likeIcon.setImageResource(R.drawable.blue_heart);
+                    } else {
+                        binding.likeIcon.setImageResource(R.drawable.gray_heart);
                     }
-                });
+                }
+            } else {
+                Toast.makeText(requireContext(), "Error updating likes.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     // update favorites list of current user when clicking like
@@ -293,44 +217,27 @@ public class BlogFragment extends Fragment {
         DocumentReference docRef = db.collection("users").document(userID);
 
         // check if already added to favorites
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        List<String> userLikes = (List<String>) document.get("favorites");
-                        if (userLikes.contains(blogID)) { // already in favorites
-                            // remove blogID from current user's favorites list
-                            docRef
-                                    .update("favorites", FieldValue.arrayRemove(blogID))
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()){
-                                                // update likes count for current blog
-                                                updateBlogLikesCount(blogID, false);
-                                            } else {
-                                                Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
-                                    });
-                        } else { // not already in favorites
-                            // add blogID to current user's favorites list
-                            docRef
-                                    .update("favorites", FieldValue.arrayUnion(blogID))
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()){
-                                                // update likes count for current blog
-                                                updateBlogLikesCount(blogID, true);
-                                            } else {
-                                                Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
-                                    });
-                        }
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    List<String> userLikes = (List<String>) document.get("favorites");
+                    if (userLikes != null && userLikes.contains(blogID)) { // Already in favorites
+                        docRef.update("favorites", FieldValue.arrayRemove(blogID)).addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                updateBlogLikesCount(blogID, false);
+                            } else {
+                                Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else { // Not already in favorites
+                        docRef.update("favorites", FieldValue.arrayUnion(blogID)).addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                updateBlogLikesCount(blogID, true);
+                            } else {
+                                Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
             }
@@ -342,32 +249,23 @@ public class BlogFragment extends Fragment {
         DocumentReference docRef = db.collection("blogs").document(blogID);
 
         // get current likes count
-        docRef
-            .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            int curLikes = document.getDouble("likes").intValue();
-                            // update likes count + 1 / -1
-                            docRef.update("likes", isAdd ? curLikes+1 : curLikes-1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        // update ui
-                                        likeIcon.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
-                                        likesTxt.setText(String.valueOf(isAdd ? curLikes+1 : curLikes-1));
-                                    } else {
-                                        Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    int curLikes = document.getDouble("likes").intValue();
+                    docRef.update("likes", isAdd ? curLikes + 1 : curLikes - 1).addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            binding.likeIcon.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
+                            binding.likes.setText(String.valueOf(isAdd ? curLikes + 1 : curLikes - 1));
+                        } else {
+                            Toast.makeText(requireContext(), "Error updating likes count.", Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
-                    }
+                    });
                 }
-            });
+            } else {
+                Toast.makeText(requireContext(), "Error getting current likes count.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
