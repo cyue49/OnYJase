@@ -33,6 +33,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -129,7 +130,7 @@ public class NewBlogFragment extends Fragment {
     private void saveBlogToDB(String title, String content) {
         String userID = viewModel.getUser().getValue().getUserID();
         String blogID = UUID.randomUUID().toString().replace("-", "");
-        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID + "/cover", 0);
+        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID + "/cover", 0, new ArrayList<>());
 
         db.collection("blogs")
                 .document(blogID)

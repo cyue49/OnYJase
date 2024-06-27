@@ -1,6 +1,7 @@
 package com.example.onyjase.views.blogs;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,10 +21,13 @@ import com.example.onyjase.databinding.FragmentBlogBinding;
 import com.example.onyjase.models.Blog;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -101,8 +105,14 @@ public class BlogFragment extends Fragment {
 
         // Delete button listener
         binding.deleteBtn.setOnClickListener(v -> {
-            // TODO: Handle delete blog action
-            Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
+            // show confirmation dialog for deleting blog
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+            LayoutInflater inflater = LayoutInflater.from(requireContext());
+            dialogBuilder.setView(inflater.inflate(R.layout.delete_blog_dialog, null));
+            dialogBuilder.setPositiveButton("Delete", (dialog, which) -> {
+                deleteBlogFromDb();
+            }).setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            dialogBuilder.create().show();
         });
     }
 
@@ -122,7 +132,8 @@ public class BlogFragment extends Fragment {
                         binding.deleteBtn.setVisibility(View.VISIBLE);
 
                         // set current blog in view model
-                        viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue()));
+                        List<String> likedBy = (List<String>) document.get("likedBy");
+                        viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue(), likedBy));
                     }
 
                     // set blog cover image
@@ -237,6 +248,7 @@ public class BlogFragment extends Fragment {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                     int curLikes = document.getDouble("likes").intValue();
+                    // update likes count
                     docRef.update("likes", isAdd ? curLikes + 1 : curLikes - 1).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             binding.likeIcon.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
@@ -245,10 +257,90 @@ public class BlogFragment extends Fragment {
                             Toast.makeText(requireContext(), "Error updating likes count.", Toast.LENGTH_SHORT).show();
                         }
                     });
+
+                    // update liked by
+                    String userID = viewModel.getUser().getValue().getUserID();
+                    docRef.update("likedBy", isAdd ? FieldValue.arrayUnion(userID): FieldValue.arrayRemove(userID)).addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            // do nothing
+                        } else {
+                            Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting current likes count.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // delete blog from db
+    private void deleteBlogFromDb() {
+        String blogID = viewModel.getCurrentBlogID().getValue();
+
+        // delete all comments of this blog
+        deleteAllBlogComments(blogID);
+
+        // delete blog cover image
+        deleteBlogImages(blogID);
+
+        // delete this blog from other user's favorites
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    // get list of all user ids of users that liked this blog
+                    List<String> likedBy = (List<String>) document.get("likedBy");
+                    for (String id : likedBy) { // for each user id, delete blogID from their favorites
+                        db.collection("users").document(id)
+                                .update("favorites", FieldValue.arrayRemove(blogID)).addOnCompleteListener(task2 -> {
+                                    if (task2.isSuccessful()) {
+                                        // do nothing
+                                    } else {
+                                        Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+
+                     // delete the blog from db
+                    docRef.delete()
+                            .addOnSuccessListener(unused -> {
+                                Toast.makeText(requireContext(), "Blog deleted.", Toast.LENGTH_SHORT).show();
+                                FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting blog.", Toast.LENGTH_SHORT).show());
+                }
+            }
+        });
+    }
+
+    // delete all comments of blog
+    private void deleteAllBlogComments(String blogID) {
+        CollectionReference colRef = db.collection("comments");
+        Query query = colRef.whereEqualTo("blogID", blogID);
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // delete all comments of this blog
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String commentID = document.getString("commentID");
+                    colRef.document(commentID).delete();
+                }
+            } else {
+                Toast.makeText(requireContext(), "Error deleting comments.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // delete images of this blog
+    private void deleteBlogImages(String blogID) {
+        String blogImgUrl = "blogs/" + blogID;
+        StorageReference listRef = storage.getReference().child(blogImgUrl);
+        listRef.listAll()
+                .addOnSuccessListener(listResult -> {
+                    for (StorageReference item : listResult.getItems()){
+                        item.delete();
+                    }
+                }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting blog images.", Toast.LENGTH_SHORT).show());
     }
 }
