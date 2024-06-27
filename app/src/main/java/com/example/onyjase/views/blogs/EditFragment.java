@@ -65,7 +65,7 @@ public class EditFragment extends Fragment {
 
         binding.selectImgBtn.setOnClickListener(v -> pickImage());
         binding.selectedImg.setOnClickListener(v -> pickImage());
-        binding.cancel.setOnClickListener(v -> FragmentTransactionHelper.popFragment(requireContext()));
+        binding.cancel.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment()));
         binding.update.setOnClickListener(v -> updateBlog());
     }
 
@@ -103,7 +103,7 @@ public class EditFragment extends Fragment {
                     Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, blog.getLikes());
                     db.collection("blogs").document(blogID).set(updatedBlog).addOnSuccessListener(aVoid -> {
                         Toast.makeText(requireContext(), "Blog updated successfully", Toast.LENGTH_SHORT).show();
-                        FragmentTransactionHelper.popFragment(requireContext());
+                        FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
                     }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating blog.", Toast.LENGTH_SHORT).show());
                 }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error getting image URL.", Toast.LENGTH_SHORT).show());
             }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error uploading image.", Toast.LENGTH_SHORT).show());

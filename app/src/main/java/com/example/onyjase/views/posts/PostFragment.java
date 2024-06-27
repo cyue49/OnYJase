@@ -1,21 +1,14 @@
 package com.example.onyjase.views.posts;
 
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -24,10 +17,6 @@ import com.example.onyjase.databinding.FragmentPostBinding;
 import com.example.onyjase.models.Post;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -81,16 +70,16 @@ public class PostFragment extends Fragment {
             setPostCoverImage("posts/" + currentPostID);
         } else {
             Toast.makeText(requireContext(), "Error fetching post.", Toast.LENGTH_SHORT).show();
-            FragmentTransactionHelper.popFragment(requireContext());
+            FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
         }
 
         // =============================================== Buttons Listeners ===============================================
 
         // back button
-        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.popFragment(requireContext()));
+        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment()));
 
         // edit button
-        binding.editBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new EditPostFragment()));
+        binding.editBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new EditPostFragment()));
 
         // delete button
         binding.deleteBtn.setOnClickListener(v -> {
@@ -129,7 +118,7 @@ public class PostFragment extends Fragment {
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting post content.", Toast.LENGTH_SHORT).show();
-                FragmentTransactionHelper.popFragment(requireContext());
+                FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
             }
         });
     }
