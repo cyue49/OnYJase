@@ -150,7 +150,7 @@ public class NewPostFragment extends Fragment {
     private void savePostToDB(String title, String content, String tag) {
         String userID = viewModel.getUser().getValue().getUserID();
         String postID = UUID.randomUUID().toString().replace("-", "");
-        Post post = new Post(postID, userID, title, content, tag, "posts/" + postID + "/cover.jpg");
+        Post post = new Post(postID, userID, title, content, tag, "posts/" + postID + "/cover");
 
         db.collection("posts")
                 .document(postID)
@@ -162,7 +162,7 @@ public class NewPostFragment extends Fragment {
     // save image to storage
     private void saveImageToStorage(String postID, Uri image) {
         StorageReference storageRef = storage.getReference();
-        StorageReference postImgRef = storageRef.child("posts/" + postID + "/cover.jpg");
+        StorageReference postImgRef = storageRef.child("posts/" + postID + "/cover");
         postImgRef.putFile(image).addOnSuccessListener(taskSnapshot -> {
             // toast success message
             Toast.makeText(requireContext(), "New admin post posted.", Toast.LENGTH_SHORT).show();

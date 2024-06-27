@@ -94,7 +94,7 @@ public class EditFragment extends Fragment {
         if (blog != null) {
             String blogID = blog.getBlogID();
             String userID = blog.getUserID();
-            String imageURL = "blogs/" + blogID + "/cover.jpg"; // Assuming the image is stored under blogs/{blogID}/cover.jpg
+            String imageURL = "blogs/" + blogID + "/cover"; // Assuming the image is stored under blogs/{blogID}/cover
 
             StorageReference imageRef = storage.getReference().child(imageURL);
             imageRef.putFile(curImageUri).addOnSuccessListener(taskSnapshot -> {

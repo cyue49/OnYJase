@@ -136,7 +136,7 @@ public class NewBlogFragment extends Fragment {
     private void saveBlogToDB(String title, String content) {
         String userID = viewModel.getUser().getValue().getUserID();
         String blogID = UUID.randomUUID().toString().replace("-", "");
-        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID + "/cover.jpg", 0);
+        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID + "/cover", 0);
 
         db.collection("blogs")
                 .document(blogID)
@@ -148,7 +148,7 @@ public class NewBlogFragment extends Fragment {
     // save image to storage
     private void saveImageToStorage(String blogID, Uri image) {
         StorageReference storageRef = storage.getReference();
-        StorageReference blogImgRef = storageRef.child("blogs/" + blogID + "/cover.jpg");
+        StorageReference blogImgRef = storageRef.child("blogs/" + blogID + "/cover");
         blogImgRef.putFile(image).addOnSuccessListener(taskSnapshot -> {
             // toast success message
             Toast.makeText(requireContext(), "New blog posted.", Toast.LENGTH_SHORT).show();
