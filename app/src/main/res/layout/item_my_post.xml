@@ -17,27 +17,6 @@
         android:layout_height="wrap_content"
         android:gravity="end">
 
-        <TextView
-            android:id="@+id/postTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/moreOptionsButton"
-            android:textStyle="bold"
-            android:paddingTop="4dp"
-            android:paddingBottom="2dp"
-            android:text="Post Title"
-            android:maxLines="2"
-            android:ellipsize="end" />
 
-        <ImageButton
-            android:id="@+id/moreOptionsButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_more_vert"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="More Options"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="8dp"
-            android:layout_centerVertical="true" />
     </RelativeLayout>
 </LinearLayout>

@@ -97,7 +97,7 @@ public class EditFragment extends Fragment {
             StorageReference imageRef = storage.getReference().child(imageURL);
             imageRef.putFile(curImageUri).addOnSuccessListener(taskSnapshot -> {
                 imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, blog.getLikes(), timestamp);
+                    Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, blog.getLikes());
                     db.collection("blogs").document(blogID).set(updatedBlog).addOnSuccessListener(aVoid -> {
                         viewModel.setCurrentBlog(updatedBlog);
                         Toast.makeText(requireContext(), "Blog updated successfully", Toast.LENGTH_SHORT).show();
