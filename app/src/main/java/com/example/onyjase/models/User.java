@@ -12,7 +12,9 @@ public class User {
     private List<String> favorites; // list of blog ids
 
     // constructor
-
+    // No-argument constructor needed for Firestore
+    public User() {
+    }
 
     public User(String userID, String username, String email, String role, String imageURL, List<String> followings, List<String> favorites) {
         this.userID = userID;

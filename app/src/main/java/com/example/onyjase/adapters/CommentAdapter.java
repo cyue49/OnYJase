@@ -5,11 +5,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.models.Comment;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -46,10 +48,21 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = comments.get(position);
+        // set username
         setCommentUsername(holder, comment.getUserID());
+        // set date time
         @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         holder.dateTime.setText(formatter.format(comment.getTimestamp()));
+        // set content
         holder.content.setText(comment.getContent());
+        // set sticker
+        String stickerUrl = comment.getStickerURL();
+        if (!stickerUrl.isEmpty()) {
+            Glide.with(context).load(stickerUrl).into(holder.sticker);
+            holder.sticker.setVisibility(View.VISIBLE);
+        } else {
+            holder.sticker.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -85,12 +98,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     // viwe holder for comments
     class CommentViewHolder extends RecyclerView.ViewHolder {
         TextView username, dateTime, content;
+        ImageView sticker;
 
         public CommentViewHolder(View view) {
             super(view);
             username = view.findViewById(R.id.username);
             dateTime = view.findViewById(R.id.dateTime);
             content = view.findViewById(R.id.content);
+            sticker = view.findViewById(R.id.sticker);
         }
     }
 }

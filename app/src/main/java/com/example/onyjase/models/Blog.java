@@ -11,7 +11,12 @@ public class Blog {
     private String content;
     private String imageURL;
     private int likes;
-    private Date timestamp;
+    //private Date timestamp;
+    private @ServerTimestamp Date timestamp;
+
+    // No-argument constructor needed for Firestore
+    public Blog() {
+    }
 
     // constructor
     public Blog(String blogID, String userID, String title, String content, String imageURL, int likes, Date timestamp) {

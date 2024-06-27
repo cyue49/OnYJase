@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/home_feed"
+    android:background="@color/white"
     tools:context=".views.blogs.BlogsFeedFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <!-- Tabs for Following, Explore, Favorites -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="blogs home feed" />
+        android:layout_height="wrap_content"
+        app:tabTextColor="@color/grayBtn"
+        app:tabSelectedTextColor="@color/mainBlue"
+        app:tabIndicatorColor="@color/grayBtn">
 
-</FrameLayout>
+        <!-- No TabItem elements needed here -->
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- ViewPager for Tabs -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

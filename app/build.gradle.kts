@@ -50,6 +50,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0") // Glide annotation processor
 
     // navigation
     implementation(libs.navigation.fragment)
@@ -57,4 +58,8 @@ dependencies {
 
     // glide
     implementation(libs.glide)
+
+    // retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 }

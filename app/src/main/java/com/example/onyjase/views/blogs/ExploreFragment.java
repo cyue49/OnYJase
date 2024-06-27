@@ -1,29 +1,62 @@
 package com.example.onyjase.views.blogs;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.example.onyjase.R;
-import com.example.onyjase.databinding.FragmentExploreBinding;
+import com.example.onyjase.adapters.BlogAdapter;
+import com.example.onyjase.models.Blog;
+import com.example.onyjase.viewmodels.AppViewModel;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-// Fragment for the explore section of the home feed for blogs
+import java.util.List;
+
 public class ExploreFragment extends Fragment {
-    FragmentExploreBinding binding;
 
+    private AppViewModel viewModel;
+    private RecyclerView recyclerView;
+    private BlogAdapter blogAdapter;
+
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_explore, container, false);
+
+        // Initialize RecyclerView
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // Initialize ViewModel
+        viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
+
+        // Initialize BlogAdapter and set it to the RecyclerView
+        blogAdapter = new BlogAdapter(viewModel, requireActivity());
+        recyclerView.setAdapter(blogAdapter);
+
+        // Load blogs from Firestore
+        loadBlogs();
+
+        return view;
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        binding = FragmentExploreBinding.inflate(inflater,container,false);
-        return binding.getRoot();
+    private void loadBlogs() {
+        // Fetch blogs from Firestore and update the adapter
+        FirebaseFirestore.getInstance().collection("blogs")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Blog> blogs = task.getResult().toObjects(Blog.class);
+                        blogAdapter.setBlogs(blogs);
+                    } else {
+                        // Handle the error
+                    }
+                });
     }
 }
