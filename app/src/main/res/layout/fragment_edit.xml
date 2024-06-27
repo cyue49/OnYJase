@@ -5,17 +5,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/subBlue"
+    tools:ignore="HardcodedText"
+    android:id="@+id/new_blog_page"
     tools:context=".views.blogs.EditFragment">
 
     <ImageView
         android:id="@+id/bg"
-        android:layout_width="362dp"
-        android:layout_height="659dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="background"
         android:src="@drawable/white_rectangle"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="@color/grayBtn"
+        android:text="Cancel"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="@+id/bg"
+        app:layout_constraintTop_toTopOf="@+id/bg" />
+
+    <Button
+        android:id="@+id/update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:backgroundTint="@color/subBlue"
+        android:text="Update"
+        app:layout_constraintEnd_toEndOf="@+id/bg"
+        app:layout_constraintTop_toTopOf="@+id/bg" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout2"
@@ -23,8 +52,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginHorizontal="20dp"
         android:hint="Blog Title"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
@@ -56,8 +84,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginHorizontal="20dp"
         android:layout_marginTop="10dp"
         android:hint="Blog Content"
         app:boxCornerRadiusBottomEnd="15dp"
@@ -85,40 +112,15 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
-        android:id="@+id/cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:backgroundTint="@color/grayBtn"
-        android:text="Cancel"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="@+id/bg"
-        app:layout_constraintTop_toTopOf="@+id/bg" />
-
-    <Button
-        android:id="@+id/update"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="20dp"
-        android:backgroundTint="@color/subBlue"
-        android:text="Update"
-        app:layout_constraintEnd_toEndOf="@+id/bg"
-        app:layout_constraintTop_toTopOf="@+id/bg" />
-
     <ImageView
         android:id="@+id/selectedImg"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_below="@id/selectImgBtn"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
+        android:layout_margin="20dp"
         android:clickable="true"
         android:focusable="true"
+        android:contentDescription="selected blog cover image"
         android:src="@drawable/blue_rectangle_border"
         app:layout_constraintBottom_toBottomOf="@+id/bg"
         app:layout_constraintEnd_toEndOf="@+id/bg"
@@ -133,6 +135,7 @@
         android:layout_marginEnd="20dp"
         android:clickable="true"
         android:focusable="true"
+        android:contentDescription="select blog cover image button"
         android:src="@drawable/add_image"
         app:layout_constraintEnd_toEndOf="@+id/bg"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
