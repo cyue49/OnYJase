@@ -60,17 +60,23 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
         holder.binding.blogTitle.setText(blog.getTitle());
 
         // Fetch the username using userID from Firestore
-        firestore.collection("users").document(blog.getUserID())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String username = documentSnapshot.getString("username");
-                        holder.binding.blogUsername.setText(username != null ? username : "Unknown");
-                    } else {
-                        holder.binding.blogUsername.setText("Unknown");
-                    }
-                })
-                .addOnFailureListener(e -> holder.binding.blogUsername.setText("Unknown"));
+        String userId = blog.getUserID();
+        if (userId != null && !userId.isEmpty()) {
+            // Fetch the username using userID from Firestore
+            firestore.collection("users").document(userId)
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String username = documentSnapshot.getString("username");
+                            holder.binding.blogUsername.setText(username != null ? username : "Unknown");
+                        } else {
+                            holder.binding.blogUsername.setText("Unknown");
+                        }
+                    })
+                    .addOnFailureListener(e -> holder.binding.blogUsername.setText("Unknown"));
+        } else {
+            holder.binding.blogUsername.setText("Unknown");
+        }
 
         // Get the image reference from Firebase Storage using the path stored in Firestore
         if (blog.getImageURL() != null && !blog.getImageURL().isEmpty()) {
