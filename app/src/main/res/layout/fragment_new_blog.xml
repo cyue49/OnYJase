@@ -13,6 +13,7 @@
         android:id="@+id/bg"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:contentDescription="background"
         android:src="@drawable/white_rectangle"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="20dp"
@@ -119,6 +120,7 @@
         android:layout_margin="20dp"
         android:clickable="true"
         android:focusable="true"
+        android:contentDescription="selected blog cover image"
         android:src="@drawable/blue_rectangle_border"
         app:layout_constraintBottom_toBottomOf="@+id/bg"
         app:layout_constraintEnd_toEndOf="@+id/bg"
@@ -133,6 +135,7 @@
         android:layout_marginEnd="20dp"
         android:clickable="true"
         android:focusable="true"
+        android:contentDescription="select blog cover image button"
         android:src="@drawable/add_image"
         app:layout_constraintEnd_toEndOf="@+id/bg"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
