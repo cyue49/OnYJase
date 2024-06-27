@@ -136,6 +136,11 @@ public class BlogFragment extends Fragment {
                         viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue(), likedBy));
                     }
 
+                    // if user is admin, show delete button
+                    if (viewModel.getUser().getValue().getRole().equals("admin")) {
+                        binding.deleteBtn.setVisibility(View.VISIBLE);
+                    }
+
                     // set blog cover image
                     setBlogCoverImage(document.getString("imageURL"));
 
