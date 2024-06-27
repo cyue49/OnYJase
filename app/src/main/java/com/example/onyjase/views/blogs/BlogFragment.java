@@ -132,7 +132,7 @@ public class BlogFragment extends Fragment {
 
         // Edit button listener
         binding.editBtn.setOnClickListener(v -> {
-            loadFragment(new EditBlogFragment());
+            loadFragment(new EditFragment());
         });
 
         // Delete button listener
@@ -159,10 +159,14 @@ public class BlogFragment extends Fragment {
             if (task.isSuccessful()){
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()){
-                    // show edit & delete button if user is current blog author
+                    // if user is current blog author
                     if (viewModel.getUser().getValue().getUserID().equals(document.getString("userID"))) {
+                        // show edit & delete button
                         binding.editBtn.setVisibility(View.VISIBLE);
                         binding.deleteBtn.setVisibility(View.VISIBLE);
+
+                        // set current blog in view model
+                        viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue()));
                     }
 
                     // set blog cover image
