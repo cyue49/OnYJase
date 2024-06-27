@@ -9,15 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentUserProfileBinding;
-import com.example.onyjase.models.User;
 import com.example.onyjase.viewmodels.AppViewModel;
-import com.example.onyjase.views.user.MyPostsFragment;
-import com.example.onyjase.views.user.MyCommentsFragment;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 public class UserProfileFragment extends Fragment {
@@ -51,19 +47,13 @@ public class UserProfileFragment extends Fragment {
             }
         });
 
-        // Set up logout button
-        /*binding.logoutButton.setOnClickListener(v -> {
-            viewModel.setUser(null);
-            NavHostFragment.findNavController(this).navigate(R.id.action_userProfileFragment_to_signInFragment);
-        });*/
-
         // Set up ViewPager with TabLayout
         ScreenSlidePagerAdapter pagerAdapter = new ScreenSlidePagerAdapter(this);
         binding.viewPager.setAdapter(pagerAdapter);
 
         new TabLayoutMediator(binding.tabLayout, binding.viewPager, (tab, position) -> {
             if (position == 0) {
-                tab.setText("My Posts");
+                tab.setText("My Blogs");
             } else if (position == 1) {
                 tab.setText("My Comments");
             }
@@ -79,7 +69,7 @@ public class UserProfileFragment extends Fragment {
         @Override
         public Fragment createFragment(int position) {
             if (position == 0) {
-                return new MyPostsFragment();
+                return new MyBlogsFragment();
             } else {
                 return new MyCommentsFragment();
             }
