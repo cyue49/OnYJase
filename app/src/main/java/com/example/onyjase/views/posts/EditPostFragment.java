@@ -1,8 +1,12 @@
 package com.example.onyjase.views.posts;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -14,13 +18,18 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentEditPostBinding;
+import com.example.onyjase.models.Post;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class EditPostFragment extends Fragment {
     FragmentEditPostBinding binding;
@@ -58,5 +67,83 @@ public class EditPostFragment extends Fragment {
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
+        // load initial data
+        Post currentPost = viewModel.getCurrentPost().getValue();
+        if (currentPost == null) {
+            Toast.makeText(requireContext(), "Error getting post.", Toast.LENGTH_SHORT).show();
+            FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment());
+        } else {
+            // set post title, content, and tag
+            binding.title.setText(currentPost.getTitle());
+            binding.content.setText(currentPost.getContent());
+            switch (currentPost.getTag()) {
+                case "learn":
+                    binding.learnRadio.toggle();
+                    break;
+                case "exam":
+                    binding.examRadio.toggle();
+                    break;
+                case "bill96":
+                    binding.bill96Radio.toggle();
+                    break;
+                default:
+                    binding.otherRadio.toggle();
+                    break;
+            }
+
+            // set post cover image
+            setPostCoverImage(currentPost.getImageURL());
+        }
+
+        // =============================================== Buttons listeners ===============================================
+
+        // select image buttons
+        binding.selectedImg.setOnClickListener(v -> pickImage());
+        binding.selectImgBtn.setOnClickListener(v -> pickImage());
+
+        // cancel button
+        binding.cancel.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment()));
+
+        // update button
+        binding.update.setOnClickListener(v -> updatePost());
+    }
+
+    // =============================================== Functions ===============================================
+
+    // picking image
+    private void pickImage() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        launcher.launch(intent);
+    }
+
+    private ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null) {
+                        binding.selectedImg.setImageURI(data.getData());
+                        curImage = data.getData();
+                    }
+                }
+            }
+    );
+
+    // set post cover image
+    private void setPostCoverImage(String imageURL){
+        StorageReference storageRef = storage.getReference();
+        storageRef.child(imageURL).getDownloadUrl()
+                .addOnSuccessListener(uri -> {
+                    Glide.with(requireContext())
+                            .load(uri)
+                            .placeholder(R.drawable.placeholder_image)
+                            .into(binding.selectedImg);
+                    curImage = uri;
+                })
+                .addOnFailureListener(e -> binding.selectedImg.setImageResource(R.drawable.placeholder_image));
+    }
+
+    private void updatePost(){
+        // todo
     }
 }
