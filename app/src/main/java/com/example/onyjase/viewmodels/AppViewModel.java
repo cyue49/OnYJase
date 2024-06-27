@@ -3,6 +3,7 @@ package com.example.onyjase.viewmodels;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.onyjase.models.Post;
 import com.example.onyjase.models.User;
 import com.example.onyjase.models.Blog;
 
@@ -11,6 +12,7 @@ public class AppViewModel extends ViewModel {
     private MutableLiveData<String> currentBlogID = new MutableLiveData<>(null);
     private MutableLiveData<String> currentPostID = new MutableLiveData<>(null);
     private MutableLiveData<Blog> currentBlog = new MutableLiveData<>(null);
+    private MutableLiveData<Post> currentPost = new MutableLiveData<>(null);
 
     public MutableLiveData<User> getUser() {
         return user;
@@ -26,6 +28,8 @@ public class AppViewModel extends ViewModel {
 
     public MutableLiveData<Blog> getCurrentBlog() {return currentBlog;}
 
+    public MutableLiveData<Post> getCurrentPost() {return currentPost;}
+
     public void setUser(User user) {
         this.user.setValue(user);
     }
@@ -40,5 +44,9 @@ public class AppViewModel extends ViewModel {
 
     public void setCurrentBlog(Blog blog) {
         this.currentBlog.setValue(blog);
+    }
+
+    public void setCurrentPost(Post post) {
+        this.currentPost.setValue(post);
     }
 }
