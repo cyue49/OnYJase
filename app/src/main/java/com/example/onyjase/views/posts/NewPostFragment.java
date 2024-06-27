@@ -162,7 +162,7 @@ public class NewPostFragment extends Fragment {
     // save image to storage
     private void saveImageToStorage(String postID, Uri image) {
         StorageReference storageRef = storage.getReference();
-        StorageReference postImgRef = storageRef.child("posts/" + postID);
+        StorageReference postImgRef = storageRef.child("posts/" + postID + "/cover.jpg");
         postImgRef.putFile(image).addOnSuccessListener(taskSnapshot -> {
             // toast success message
             Toast.makeText(requireContext(), "New admin post posted.", Toast.LENGTH_SHORT).show();

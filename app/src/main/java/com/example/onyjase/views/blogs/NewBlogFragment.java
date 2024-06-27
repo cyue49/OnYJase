@@ -148,7 +148,7 @@ public class NewBlogFragment extends Fragment {
     // save image to storage
     private void saveImageToStorage(String blogID, Uri image) {
         StorageReference storageRef = storage.getReference();
-        StorageReference blogImgRef = storageRef.child("blogs/" + blogID);
+        StorageReference blogImgRef = storageRef.child("blogs/" + blogID + "/cover.jpg");
         blogImgRef.putFile(image).addOnSuccessListener(taskSnapshot -> {
             // toast success message
             Toast.makeText(requireContext(), "New blog posted.", Toast.LENGTH_SHORT).show();
