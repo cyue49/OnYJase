@@ -81,16 +81,16 @@ public class PostFragment extends Fragment {
             setPostCoverImage("posts/" + currentPostID);
         } else {
             Toast.makeText(requireContext(), "Error fetching post.", Toast.LENGTH_SHORT).show();
-            FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
+            FragmentTransactionHelper.popFragment(requireContext());
         }
 
         // =============================================== Buttons Listeners ===============================================
 
         // back button
-        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment()));
+        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.popFragment(requireContext()));
 
         // edit button
-        binding.editBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new EditPostFragment()));
+        binding.editBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new EditPostFragment()));
 
         // delete button
         binding.deleteBtn.setOnClickListener(v -> {
@@ -129,7 +129,7 @@ public class PostFragment extends Fragment {
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting post content.", Toast.LENGTH_SHORT).show();
-                FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
+                FragmentTransactionHelper.popFragment(requireContext());
             }
         });
     }

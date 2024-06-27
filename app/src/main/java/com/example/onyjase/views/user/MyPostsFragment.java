@@ -47,7 +47,7 @@ public class MyPostsFragment extends Fragment {
             @Override
             public void onEditClick(Blog post) {
                 viewModel.setCurrentBlog(post);
-                FragmentTransactionHelper.loadFragment(requireContext(), new EditFragment());
+                FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new EditFragment());
             }
 
             @Override
@@ -58,7 +58,7 @@ public class MyPostsFragment extends Fragment {
             @Override
             public void onPostClick(Blog post) {
                 viewModel.setCurrentBlogID(post.getBlogID());
-                FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+                FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new BlogFragment());
             }
         });
 
