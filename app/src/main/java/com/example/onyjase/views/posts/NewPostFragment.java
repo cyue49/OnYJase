@@ -182,8 +182,7 @@ public class NewPostFragment extends Fragment {
     private void savePostToDB(String title, String content, String tag) {
         String userID = viewModel.getUser().getValue().getUserID();
         String postID = UUID.randomUUID().toString().replace("-", "");
-        Date dateTime = new Date();
-        Post post = new Post(postID, userID, title, content, tag, "posts/" + postID, dateTime);
+        Post post = new Post(postID, userID, title, content, tag, "posts/" + postID);
 
         db.collection("posts")
                 .document(postID)
