@@ -162,7 +162,7 @@ public class EditPostFragment extends Fragment {
     // update a post in database
     private void updatePostInDb(String tag){
         String userID = viewModel.getUser().getValue().getUserID();
-        String postID = viewModel.getCurrentPostID().getValue();
+        String postID = viewModel.getCurrentPost().getValue().getPostID();
         String title = binding.title.getText().toString();
         String content = binding.content.getText().toString();
         String imageURL = "posts/" + postID + "/cover";
