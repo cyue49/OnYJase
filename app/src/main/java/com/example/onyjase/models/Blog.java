@@ -3,6 +3,7 @@ package com.example.onyjase.models;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
+import java.util.List;
 
 public class Blog {
     private String blogID;
@@ -11,22 +12,24 @@ public class Blog {
     private String content;
     private String imageURL;
     private int likes;
+    private List<String> likedBy; // list of user ids
     //private Date timestamp;
-    private @ServerTimestamp Date timestamp;
+    @ServerTimestamp
+    private  Date timestamp;
 
     // No-argument constructor needed for Firestore
     public Blog() {
     }
 
     // constructor
-    public Blog(String blogID, String userID, String title, String content, String imageURL, int likes, Date timestamp) {
+    public Blog(String blogID, String userID, String title, String content, String imageURL, int likes, List<String> likedBy) {
         this.blogID = blogID;
         this.userID = userID;
         this.title = title;
         this.content = content;
         this.imageURL = imageURL;
         this.likes = likes;
-        this.timestamp = timestamp;
+        this.likedBy = likedBy;
     }
 
     // getters
@@ -52,6 +55,10 @@ public class Blog {
 
     public int getLikes() {
         return likes;
+    }
+
+    public List<String> getLikedBy() {
+        return likedBy;
     }
 
     public Date getTimestamp() {
@@ -81,6 +88,10 @@ public class Blog {
 
     public void setLikes(int likes) {
         this.likes = likes;
+    }
+
+    public void setLikedBy(List<String> likedBy) {
+        this.likedBy = likedBy;
     }
 
     public void setTimestamp(Date timestamp) {

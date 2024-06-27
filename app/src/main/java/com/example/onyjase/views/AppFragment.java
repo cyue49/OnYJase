@@ -23,10 +23,11 @@ import android.widget.LinearLayout;
 
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentAppBinding;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogsFeedFragment;
 import com.example.onyjase.views.blogs.NewBlogFragment;
-import com.example.onyjase.views.blogs.NewPostFragment;
+import com.example.onyjase.views.posts.NewPostFragment;
 import com.example.onyjase.views.notifications.NotificationsFragment;
 import com.example.onyjase.views.posts.PostsFeedFragment;
 import com.example.onyjase.views.user.UserProfileFragment;
@@ -58,7 +59,7 @@ public class AppFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // start on blogs home feed page
-        loadFragment(new BlogsFeedFragment());
+        FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
 
         // initializing variables
         bottomNav = binding.bottomNav;
@@ -85,39 +86,31 @@ public class AppFragment extends Fragment {
         bottomNav.setOnItemSelectedListener(item -> {
             switch(item.getItemId()) {
                 case R.id.home:
-                    loadFragment(new BlogsFeedFragment());
+                    FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
                     break;
 
                 case R.id.info:
-                    loadFragment(new PostsFeedFragment());
+                    FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
                     break;
 
                 case R.id.add:
                     if (viewModel.getUser().getValue().getRole().equals("admin")){
                         showDialog();
                     } else {
-                        loadFragment(new NewBlogFragment());
+                        FragmentTransactionHelper.loadFragment(requireContext(), new NewBlogFragment());
                     }
                     break;
 
                 case R.id.notification:
-                    loadFragment(new NotificationsFragment());
+                    FragmentTransactionHelper.loadFragment(requireContext(), new NotificationsFragment());
                     break;
 
                 case R.id.profile:
-                    loadFragment(new UserProfileFragment());
+                    FragmentTransactionHelper.loadFragment(requireContext(), new UserProfileFragment());
                     break;
             }
             return true;
         });
-    }
-
-    // go to fragment
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
     }
 
     // show bottom sheet dialog for choosing between new blog or new post
@@ -130,21 +123,15 @@ public class AppFragment extends Fragment {
         LinearLayout optionPost = dialog.findViewById(R.id.writeNewPost);
 
         // new blog
-        optionBlog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new NewBlogFragment());
-                dialog.dismiss();
-            }
+        optionBlog.setOnClickListener(v -> {
+            FragmentTransactionHelper.loadFragment(requireContext(), new NewBlogFragment());
+            dialog.dismiss();
         });
 
         // new post
-        optionPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new NewPostFragment());
-                dialog.dismiss();
-            }
+        optionPost.setOnClickListener(v -> {
+            FragmentTransactionHelper.loadFragment(requireContext(), new NewPostFragment());
+            dialog.dismiss();
         });
 
         dialog.show();

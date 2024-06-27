@@ -6,13 +6,14 @@
     android:layout_height="match_parent"
     android:background="@color/subBlue"
     tools:ignore="HardcodedText"
-    android:id="@+id/new_post_page"
-    tools:context=".views.posts.NewPostFragment">
+    android:id="@+id/new_blog_page"
+    tools:context=".views.blogs.EditFragment">
 
     <ImageView
         android:id="@+id/bg"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:contentDescription="background"
         android:src="@drawable/white_rectangle"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="20dp"
@@ -35,13 +36,13 @@
         app:layout_constraintTop_toTopOf="@+id/bg" />
 
     <Button
-        android:id="@+id/post"
+        android:id="@+id/update"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="20dp"
         android:backgroundTint="@color/subBlue"
-        android:text="Post"
+        android:text="Update"
         app:layout_constraintEnd_toEndOf="@+id/bg"
         app:layout_constraintTop_toTopOf="@+id/bg" />
 
@@ -52,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginHorizontal="20dp"
-        android:hint="Post Title"
+        android:hint="Blog Title"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
@@ -85,7 +86,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="10dp"
-        android:hint="Post Content"
+        android:hint="Blog Content"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
@@ -111,81 +112,6 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/tagLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="25dp"
-        android:layout_marginTop="20dp"
-        android:text="Tag:"
-        app:layout_constraintStart_toStartOf="@+id/bg"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
-
-    <RadioGroup
-        android:id="@+id/tagsRadioGroup"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintEnd_toEndOf="@+id/bg"
-        app:layout_constraintStart_toStartOf="@+id/bg"
-        app:layout_constraintTop_toBottomOf="@+id/tagLabel">
-
-        <RadioButton
-            android:id="@+id/learnRadio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="3dp"
-            android:buttonTint="@color/subBlue"
-            android:text="Learn" />
-
-        <RadioButton
-            android:id="@+id/examRadio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="3dp"
-            android:buttonTint="@color/subBlue"
-            android:text="Exam" />
-
-        <RadioButton
-            android:id="@+id/bill96Radio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="3dp"
-            android:buttonTint="@color/subBlue"
-            android:text="Bill 96" />
-
-        <RadioButton
-            android:id="@+id/otherRadio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="3dp"
-            android:buttonTint="@color/subBlue"
-            android:text="Other" />
-    </RadioGroup>
-
-    <TextView
-        android:id="@+id/imageCoverLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="25dp"
-        android:layout_marginTop="10dp"
-        android:text="Add a post cover:"
-        app:layout_constraintStart_toStartOf="@+id/bg"
-        app:layout_constraintTop_toBottomOf="@+id/tagsRadioGroup" />
-
-    <ImageView
-        android:id="@+id/selectImgBtn"
-        android:layout_width="41dp"
-        android:layout_height="38dp"
-        android:layout_marginEnd="20dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/add_image"
-        app:layout_constraintEnd_toEndOf="@+id/bg"
-        app:layout_constraintTop_toBottomOf="@+id/tagsRadioGroup" />
-
     <ImageView
         android:id="@+id/selectedImg"
         android:layout_width="0dp"
@@ -194,10 +120,35 @@
         android:layout_margin="20dp"
         android:clickable="true"
         android:focusable="true"
+        android:contentDescription="selected blog cover image"
         android:src="@drawable/blue_rectangle_border"
         app:layout_constraintBottom_toBottomOf="@+id/bg"
         app:layout_constraintEnd_toEndOf="@+id/bg"
         app:layout_constraintStart_toStartOf="@+id/bg"
         app:layout_constraintTop_toBottomOf="@+id/imageCoverLabel" />
+
+    <ImageView
+        android:id="@+id/selectImgBtn"
+        android:layout_width="41dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="select blog cover image button"
+        android:src="@drawable/add_image"
+        app:layout_constraintEnd_toEndOf="@+id/bg"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <TextView
+        android:id="@+id/imageCoverLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="20dp"
+        android:text="Add a blog cover:"
+        app:layout_constraintStart_toStartOf="@+id/bg"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

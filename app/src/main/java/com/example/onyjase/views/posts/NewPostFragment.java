@@ -1,4 +1,4 @@
-package com.example.onyjase.views.blogs;
+package com.example.onyjase.views.posts;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -18,13 +18,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.example.onyjase.R;
-import com.example.onyjase.databinding.FragmentNewBlogBinding;
-import com.example.onyjase.models.Blog;
+import com.example.onyjase.databinding.FragmentNewPostBinding;
+import com.example.onyjase.models.Post;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.example.onyjase.views.posts.PostFragment;
+import com.example.onyjase.views.posts.PostsFeedFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
@@ -33,13 +37,11 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
-// Fragment for the page for creating a new blog
-public class NewBlogFragment extends Fragment {
-    FragmentNewBlogBinding binding;
+public class NewPostFragment extends Fragment {
+    FragmentNewPostBinding binding;
 
     // selecting image
     Uri curImage;
@@ -61,7 +63,7 @@ public class NewBlogFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentNewBlogBinding.inflate(inflater,container,false);
+        binding = FragmentNewPostBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -74,19 +76,29 @@ public class NewBlogFragment extends Fragment {
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
-        // cancel button listener
+        // cancel button
         binding.cancel.setOnClickListener(v -> {
             clearInputs();
-            FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
         });
 
         // post button
         binding.post.setOnClickListener(v -> {
-            if (binding.title.getText() == null || binding.content.getText() == null || binding.title.getText().toString().isEmpty() || binding.content.getText().toString().isEmpty() || curImage == null) {
+            if (binding.title.getText() == null || binding.content.getText() == null || binding.title.getText().toString().isEmpty() || binding.content.getText().toString().isEmpty() || curImage == null || binding.tagsRadioGroup.getCheckedRadioButtonId() == -1){
                 Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
             } else {
-                // save blog to db
-                saveBlogToDB(binding.title.getText().toString(), binding.content.getText().toString());
+                // save post to db
+                if (binding.learnRadio.isChecked()) {
+                    savePostToDB(binding.title.getText().toString(), binding.content.getText().toString(), "learn");
+                } else if (binding.examRadio.isChecked()) {
+                    savePostToDB(binding.title.getText().toString(), binding.content.getText().toString(), "exam");
+                } else if (binding.bill96Radio.isChecked()) {
+                    savePostToDB(binding.title.getText().toString(), binding.content.getText().toString(), "bill96");
+                } else if (binding.otherRadio.isChecked()) {
+                    savePostToDB(binding.title.getText().toString(), binding.content.getText().toString(), "other");
+                } else {
+                    Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -97,15 +109,16 @@ public class NewBlogFragment extends Fragment {
         binding.selectedImg.setOnClickListener(v -> pickImage());
     }
 
+    // =============================================== Functions ===============================================
+
     // clear all inputs
     private void clearInputs() {
         binding.title.setText("");
         binding.content.setText("");
         curImage = null;
         binding.selectedImg.setImageResource(R.drawable.blue_rectangle_border);
+        binding.tagsRadioGroup.clearCheck();
     }
-
-    // =============================================== Functions ===============================================
 
     // picking image
     private void pickImage() {
@@ -124,40 +137,40 @@ public class NewBlogFragment extends Fragment {
                     }
                 }
             }
-            );
+    );
 
-    // save blog to db
-    private void saveBlogToDB(String title, String content) {
+    // save post to db
+    private void savePostToDB(String title, String content, String tag) {
         String userID = viewModel.getUser().getValue().getUserID();
-        String blogID = UUID.randomUUID().toString().replace("-", "");
-        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID + "/cover", 0, new ArrayList<>());
+        String postID = UUID.randomUUID().toString().replace("-", "");
+        Post post = new Post(postID, userID, title, content, tag, "posts/" + postID + "/cover");
 
-        db.collection("blogs")
-                .document(blogID)
-                .set(blog)
-                .addOnSuccessListener(unused -> saveImageToStorage(blogID, curImage)) // save image to storage
-                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error posting new blog.", Toast.LENGTH_SHORT).show());
+        db.collection("posts")
+                .document(postID)
+                .set(post)
+                .addOnSuccessListener(unused -> saveImageToStorage(postID, curImage)) // save image to storage
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show());
     }
 
     // save image to storage
-    private void saveImageToStorage(String blogID, Uri image) {
+    private void saveImageToStorage(String postID, Uri image) {
         StorageReference storageRef = storage.getReference();
-        StorageReference blogImgRef = storageRef.child("blogs/" + blogID + "/cover");
-        blogImgRef.putFile(image).addOnSuccessListener(taskSnapshot -> {
+        StorageReference postImgRef = storageRef.child("posts/" + postID + "/cover");
+        postImgRef.putFile(image).addOnSuccessListener(taskSnapshot -> {
             // toast success message
-            Toast.makeText(requireContext(), "New blog posted.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "New admin post posted.", Toast.LENGTH_SHORT).show();
 
-            // update view model current blog
-            viewModel.setCurrentBlogID(blogID);
+            // update view model current post
+            viewModel.setCurrentPostID(postID);
 
-            // go to blog page
-            FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+            // go to post page
+            FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment());
         }).addOnFailureListener(e -> {
-            // saving image to storage failed, delete blog from database
-            db.collection("blogs").document(blogID).delete();
+            // saving image to storage failed, delete post from database
+            db.collection("posts").document(postID).delete();
 
             // toast error message
-            Toast.makeText(requireContext(), "Error posting new blog.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show();
         });
     }
 }

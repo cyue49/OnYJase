@@ -1,10 +1,10 @@
 package com.example.onyjase.adapters;
 
-// adapter for list of blogs in blogs home feed
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -12,7 +12,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
-import com.example.onyjase.databinding.ItemBlogBinding;
+import com.example.onyjase.databinding.ItemMyBlogBinding;
 import com.example.onyjase.models.Blog;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
@@ -23,7 +23,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
-public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder> {
+public class MyBlogsAdapter extends RecyclerView.Adapter<MyBlogsAdapter.BlogViewHolder> {
 
     private List<Blog> blogs;
     private AppViewModel viewModel;
@@ -31,7 +31,7 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
     private FirebaseFirestore firestore;
     private FirebaseStorage storage;
 
-    public BlogAdapter(AppViewModel viewModel, Activity context) {
+    public MyBlogsAdapter(AppViewModel viewModel, Activity context) {
         this.viewModel = viewModel;
         this.context = context;
         this.blogs = List.of(); // Initialize with an empty list
@@ -40,9 +40,9 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
     }
 
     public static class BlogViewHolder extends RecyclerView.ViewHolder {
-        private final ItemBlogBinding binding;
+        private final ItemMyBlogBinding binding;
 
-        public BlogViewHolder(@NonNull ItemBlogBinding binding) {
+        public BlogViewHolder(@NonNull ItemMyBlogBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
@@ -51,7 +51,7 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
     @NonNull
     @Override
     public BlogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ItemBlogBinding binding = ItemBlogBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        ItemMyBlogBinding binding = ItemMyBlogBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
         return new BlogViewHolder(binding);
     }
 
@@ -60,24 +60,7 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
         Blog blog = blogs.get(position);
         holder.binding.blogTitle.setText(blog.getTitle());
 
-        // Fetch the username using userID from Firestore
-        String userId = blog.getUserID();
-        if (userId != null && !userId.isEmpty()) {
-            // Fetch the username using userID from Firestore
-            firestore.collection("users").document(userId)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String username = documentSnapshot.getString("username");
-                            holder.binding.blogUsername.setText(username != null ? username : "Unknown");
-                        } else {
-                            holder.binding.blogUsername.setText("Unknown");
-                        }
-                    })
-                    .addOnFailureListener(e -> holder.binding.blogUsername.setText("Unknown"));
-        } else {
-            holder.binding.blogUsername.setText("Unknown");
-        }
+
 
         // Get the image reference from Firebase Storage using the path stored in Firestore
         if (blog.getImageURL() != null && !blog.getImageURL().isEmpty()) {
@@ -99,6 +82,25 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
         };
         holder.binding.blogImage.setOnClickListener(listener);
         holder.binding.blogTitle.setOnClickListener(listener);
+
+        // Set up more options button
+        holder.binding.moreOptionsButton.setOnClickListener(view -> {
+            PopupMenu popupMenu = new PopupMenu(context, holder.binding.moreOptionsButton);
+            popupMenu.inflate(R.menu.popup_menu); // Make sure to have this menu resource
+            popupMenu.setOnMenuItemClickListener(menuItem -> {
+                switch (menuItem.getItemId()) {
+                    case R.id.action_edit:
+                        // Handle edit option
+                        return true;
+                    case R.id.action_delete:
+                        // Handle delete option
+                        return true;
+                    default:
+                        return false;
+                }
+            });
+            popupMenu.show();
+        });
     }
 
     @Override
