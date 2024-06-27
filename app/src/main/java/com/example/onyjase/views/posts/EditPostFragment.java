@@ -105,7 +105,23 @@ public class EditPostFragment extends Fragment {
         binding.cancel.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment()));
 
         // update button
-        binding.update.setOnClickListener(v -> updatePost());
+        binding.update.setOnClickListener(v -> {
+            if (binding.title.getText() == null || binding.content.getText() == null || binding.title.getText().toString().isEmpty() || binding.content.getText().toString().isEmpty() || curImage == null || binding.tagsRadioGroup.getCheckedRadioButtonId() == -1) {
+                Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
+            } else {
+                if (binding.learnRadio.isChecked()) {
+                    updatePostInDb("learn");
+                } else if (binding.examRadio.isChecked()) {
+                    updatePostInDb("exam");
+                } else if (binding.bill96Radio.isChecked()) {
+                    updatePostInDb("bill96");
+                } else if (binding.otherRadio.isChecked()) {
+                    updatePostInDb("other");
+                } else {
+                    Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     // =============================================== Functions ===============================================
@@ -143,7 +159,31 @@ public class EditPostFragment extends Fragment {
                 .addOnFailureListener(e -> binding.selectedImg.setImageResource(R.drawable.placeholder_image));
     }
 
-    private void updatePost(){
-        // todo
+    // update a post in database
+    private void updatePostInDb(String tag){
+        String userID = viewModel.getUser().getValue().getUserID();
+        String postID = viewModel.getCurrentPostID().getValue();
+        String title = binding.title.getText().toString();
+        String content = binding.content.getText().toString();
+        String imageURL = "posts/" + postID + "/cover";
+
+        // new updated post
+        Post newPost = new Post(postID, userID, title, content, tag, imageURL);
+
+        // save image to storage
+        StorageReference imageRef = storage.getReference().child(imageURL);
+        imageRef.putFile(curImage).addOnSuccessListener(taskSnapshot -> {
+            // save post to database
+            db.collection("posts")
+                    .document(postID)
+                    .set(newPost)
+                    .addOnSuccessListener(unused -> {
+                        // toast success message
+                        Toast.makeText(requireContext(), "Admin post updated.", Toast.LENGTH_SHORT).show();
+
+                        // back to post page
+                        FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment());
+                    }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating admin post", Toast.LENGTH_SHORT).show());
+        }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating admin post", Toast.LENGTH_SHORT).show());
     }
 }
