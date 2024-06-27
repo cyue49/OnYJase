@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentNotificationsBinding;
 import com.example.onyjase.models.Blog;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogFragment;
 import com.example.onyjase.views.posts.PostFragment;
@@ -51,7 +52,7 @@ public class NotificationsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 viewModel.setCurrentBlogID("187385f6f3554765934e005793cd0b55");
-                loadFragment(new BlogFragment());
+                FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new BlogFragment());
             }
         });
 
@@ -59,16 +60,8 @@ public class NotificationsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 viewModel.setCurrentPostID("e0869a9461654797922b462261b63504");
-                loadFragment(new PostFragment());
+                FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new PostFragment());
             }
         });
-    }
-
-    // go to another fragment
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
     }
 }

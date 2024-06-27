@@ -1,8 +1,6 @@
 package com.example.onyjase.views.blogs;
 
 import android.annotation.SuppressLint;
-import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,61 +8,27 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
-import com.example.onyjase.adapters.CommentAdapter;
-import com.example.onyjase.adapters.StickerAdapter;
 import com.example.onyjase.databinding.FragmentBlogBinding;
 import com.example.onyjase.models.Blog;
-import com.example.onyjase.models.Comment;
-import com.example.onyjase.models.stickers.Sticker;
-import com.example.onyjase.models.stickers.StickerImage;
-import com.example.onyjase.models.stickers.StickerImages;
-import com.example.onyjase.models.stickers.Stickers;
-import com.example.onyjase.utils.StickersService;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 // Fragment for a single blog
 public class BlogFragment extends Fragment {
@@ -117,7 +81,7 @@ public class BlogFragment extends Fragment {
             setLikeIcon(currentBlogID);
         } else {
             Toast.makeText(requireContext(), "Error fetching blog.", Toast.LENGTH_SHORT).show();
-            loadFragment(new BlogsFeedFragment());
+            FragmentTransactionHelper.popFragment(requireContext());
         }
 
         // =============================================== Buttons Listeners ===============================================
@@ -128,11 +92,11 @@ public class BlogFragment extends Fragment {
         });
 
         // Back button listener
-        binding.backBtn.setOnClickListener(v -> loadFragment(new BlogsFeedFragment()));
+        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.popFragment(requireContext()));
 
         // Edit button listener
         binding.editBtn.setOnClickListener(v -> {
-            loadFragment(new EditFragment());
+            FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new EditFragment());
         });
 
         // Delete button listener
@@ -143,14 +107,6 @@ public class BlogFragment extends Fragment {
     }
 
     // =============================================== Functions ===============================================
-
-    // go to another fragment
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
-    }
 
     // set the title, content, date, and number of likes for the current blog
     private void setBlogContent(String blogID) {
@@ -186,7 +142,7 @@ public class BlogFragment extends Fragment {
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
-                loadFragment(new BlogsFeedFragment());
+                FragmentTransactionHelper.popFragment(requireContext());
             }
         });
     }

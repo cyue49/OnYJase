@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentPostBinding;
 import com.example.onyjase.models.Post;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -80,16 +81,16 @@ public class PostFragment extends Fragment {
             setPostCoverImage("posts/" + currentPostID);
         } else {
             Toast.makeText(requireContext(), "Error fetching post.", Toast.LENGTH_SHORT).show();
-            loadFragment(new PostsFeedFragment());
+            FragmentTransactionHelper.popFragment(requireContext());
         }
 
         // =============================================== Buttons Listeners ===============================================
 
         // back button
-        binding.backBtn.setOnClickListener(v -> loadFragment(new PostsFeedFragment()));
+        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.popFragment(requireContext()));
 
         // edit button
-        binding.editBtn.setOnClickListener(v -> loadFragment(new EditPostFragment()));
+        binding.editBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new EditPostFragment()));
 
         // delete button
         binding.deleteBtn.setOnClickListener(v -> {
@@ -99,14 +100,6 @@ public class PostFragment extends Fragment {
     }
 
     // =============================================== Functions ===============================================
-
-    // go to another fragment
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
-    }
 
     // set the title and content of the post
     private void setPostContent(String postID) {
@@ -136,7 +129,7 @@ public class PostFragment extends Fragment {
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting post content.", Toast.LENGTH_SHORT).show();
-                loadFragment(new PostsFeedFragment());
+                FragmentTransactionHelper.popFragment(requireContext());
             }
         });
     }
