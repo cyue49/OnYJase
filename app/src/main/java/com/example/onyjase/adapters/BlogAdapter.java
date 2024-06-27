@@ -87,7 +87,7 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
 
         // Set click listeners to navigate to BlogFragment
         View.OnClickListener listener = v -> {
-            viewModel.setCurrentBlog(blog);
+            viewModel.setCurrentBlogID(blog.getBlogID());
             loadFragment(new BlogFragment());
         };
         holder.binding.blogImage.setOnClickListener(listener);
@@ -107,8 +107,7 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .addToBackStack(null)
+                .replace(R.id.container, fragment)
                 .commit();
     }
 }
