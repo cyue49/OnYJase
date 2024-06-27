@@ -52,7 +52,7 @@ public class NotificationsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 viewModel.setCurrentBlogID("187385f6f3554765934e005793cd0b55");
-                FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new BlogFragment());
+                FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
             }
         });
 
@@ -60,7 +60,7 @@ public class NotificationsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 viewModel.setCurrentPostID("e0869a9461654797922b462261b63504");
-                FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new PostFragment());
+                FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment());
             }
         });
     }

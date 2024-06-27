@@ -81,7 +81,7 @@ public class BlogFragment extends Fragment {
             setLikeIcon(currentBlogID);
         } else {
             Toast.makeText(requireContext(), "Error fetching blog.", Toast.LENGTH_SHORT).show();
-            FragmentTransactionHelper.popFragment(requireContext());
+            FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
         }
 
         // =============================================== Buttons Listeners ===============================================
@@ -92,11 +92,11 @@ public class BlogFragment extends Fragment {
         });
 
         // Back button listener
-        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.popFragment(requireContext()));
+        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment()));
 
         // Edit button listener
         binding.editBtn.setOnClickListener(v -> {
-            FragmentTransactionHelper.loadFragmentFullScreen(requireContext(), new EditFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new EditFragment());
         });
 
         // Delete button listener
@@ -142,7 +142,7 @@ public class BlogFragment extends Fragment {
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
-                FragmentTransactionHelper.popFragment(requireContext());
+                FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
             }
         });
     }
