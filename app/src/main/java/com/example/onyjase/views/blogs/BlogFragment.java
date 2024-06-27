@@ -105,18 +105,27 @@ public class BlogFragment extends Fragment {
         binding.blogContent.setVisibility(View.INVISIBLE);
 
         // Display content from current blog of view model
-        viewModel.getCurrentBlog().observe(getViewLifecycleOwner(), this::setBlogContent);
+        String currentBlogID = viewModel.getCurrentBlogID().getValue();
+        if (currentBlogID != null) {
+            // set title, content, date, likes, author, and cover image
+            setBlogContent(currentBlogID);
+
+            // set like icon depending on if current user has previously like current blog
+            setLikeIcon(currentBlogID);
+        } else {
+            Toast.makeText(requireContext(), "Error fetching blog.", Toast.LENGTH_SHORT).show();
+            loadFragment(new BlogsFeedFragment());
+        }
+
+        // =============================================== Buttons Listeners ===============================================
 
         // Likes button listener
         binding.likeBtn.setOnClickListener(v -> {
-            Blog currentBlog = viewModel.getCurrentBlog().getValue();
-            if (currentBlog != null) {
-                updateBlogLikes(currentBlog.getBlogID());
-            }
+            updateBlogLikes(currentBlogID);
         });
 
         // Back button listener
-        binding.backBtn.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        binding.backBtn.setOnClickListener(v -> loadFragment(new BlogsFeedFragment()));
 
         // Edit button listener
         binding.editBtn.setOnClickListener(v -> {
@@ -137,7 +146,7 @@ public class BlogFragment extends Fragment {
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = getParentFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragmentContainerView, fragment);
+        transaction.replace(R.id.container, fragment);
         transaction.commit();
     }
 
@@ -170,25 +179,36 @@ public class BlogFragment extends Fragment {
     }
 
     // set the title, content, date, and number of likes for the current blog
-    @SuppressLint("SimpleDateFormat")
-    private void setBlogContent(Blog blog) {
-        if (blog == null) return;
+    private void setBlogContent(String blogID) {
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()){
+                    // show edit & delete button if user is current blog author
+                    if (viewModel.getUser().getValue().getUserID().equals(document.getString("userID"))) {
+                        binding.editBtn.setVisibility(View.VISIBLE);
+                        binding.deleteBtn.setVisibility(View.VISIBLE);
+                    }
 
-        if (viewModel.getUser().getValue().getUserID().equals(blog.getUserID())) {
-            binding.editBtn.setVisibility(View.VISIBLE);
-            binding.deleteBtn.setVisibility(View.VISIBLE);
-        }
+                    // set blog cover image
+                    setBlogCoverImage(document.getString("imageURL"));
 
-        setBlogCoverImage(blog.getImageURL());
-        setBlogUserName(blog.getUserID());
+                    // set author username
+                    setBlogUserName(document.getString("userID"));
 
-        binding.title.setText(blog.getTitle());
-        binding.content.setText(blog.getContent());
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        binding.dateTime.setText(formatter.format(blog.getTimestamp()));
-        binding.likes.setText(String.valueOf(blog.getLikes()));
-
-        setLikeIcon(blog.getBlogID());
+                    // set title, content, date, and number of likes
+                    binding.title.setText(document.getString("title"));
+                    binding.content.setText(document.getString("content"));
+                    @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    binding.dateTime.setText(formatter.format(document.getTimestamp("timestamp").toDate()));
+                    binding.likes.setText(String.valueOf(document.getDouble("likes").intValue()));
+                }
+            } else {
+                Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
+                loadFragment(new BlogsFeedFragment());
+            }
+        });
     }
 
     // set blog like icon depending on if current user like it or not

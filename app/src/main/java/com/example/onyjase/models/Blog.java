@@ -19,14 +19,13 @@ public class Blog {
     }
 
     // constructor
-    public Blog(String blogID, String userID, String title, String content, String imageURL, int likes, Date timestamp) {
+    public Blog(String blogID, String userID, String title, String content, String imageURL, int likes) {
         this.blogID = blogID;
         this.userID = userID;
         this.title = title;
         this.content = content;
         this.imageURL = imageURL;
         this.likes = likes;
-        this.timestamp = timestamp;
     }
 
     // getters

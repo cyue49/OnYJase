@@ -161,8 +161,7 @@ public class NewBlogFragment extends Fragment {
     private void saveBlogToDB(String title, String content) {
         String userID = viewModel.getUser().getValue().getUserID();
         String blogID = UUID.randomUUID().toString().replace("-", "");
-        Date dateTime = new Date();
-        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID, 0, dateTime);
+        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID, 0);
 
         db.collection("blogs")
                 .document(blogID)
