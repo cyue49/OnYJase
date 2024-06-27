@@ -25,14 +25,7 @@ import com.google.firebase.storage.FirebaseStorage;
 public class EditPostFragment extends Fragment {
     FragmentEditPostBinding binding;
 
-    // ui components variables
-    Button cancelBtn, updateBtn;
-    TextInputEditText titleInput, contentInput;
-    RadioButton learnRadio, examRadio, bill96Radio, otherRadio;
-    RadioGroup radioGroup;
-
     // selecting image
-    ImageView selectImgBtn, selectImgBox;
     Uri curImage;
 
     // firebase firestore
@@ -61,20 +54,9 @@ public class EditPostFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // initializing variables
-        cancelBtn = binding.cancel;
-        updateBtn = binding.update;
-        titleInput = binding.title;
-        contentInput = binding.content;
-        selectImgBtn = binding.selectImgBtn;
-        selectImgBox = binding.selectedImg;
-        learnRadio = binding.learnRadio;
-        examRadio = binding.examRadio;
-        bill96Radio = binding.bill96Radio;
-        otherRadio = binding.otherRadio;
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
-
 
     }
 }

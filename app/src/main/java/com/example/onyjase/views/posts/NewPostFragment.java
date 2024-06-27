@@ -42,14 +42,7 @@ import java.util.UUID;
 public class NewPostFragment extends Fragment {
     FragmentNewPostBinding binding;
 
-    // ui components variables
-    Button cancelBtn, postBtn;
-    TextInputEditText titleInput, contentInput;
-    RadioButton learnRadio, examRadio, bill96Radio, otherRadio;
-    RadioGroup radioGroup;
-
     // selecting image
-    ImageView selectImgBtn, selectImgBox;
     Uri curImage;
 
     // firebase firestore
@@ -78,77 +71,52 @@ public class NewPostFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // initializing variables
-        cancelBtn = binding.cancel;
-        postBtn = binding.post;
-        titleInput = binding.title;
-        contentInput = binding.content;
-        selectImgBtn = binding.selectImgBtn;
-        selectImgBox = binding.selectedImg;
-        learnRadio = binding.learnRadio;
-        examRadio = binding.examRadio;
-        bill96Radio = binding.bill96Radio;
-        otherRadio = binding.otherRadio;
-        radioGroup = binding.tagsRadioGroup;
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         // cancel button
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clearInputs();
-                loadFragment(new PostsFeedFragment());
-            }
+        binding.cancel.setOnClickListener(v -> {
+            clearInputs();
+            loadFragment(new PostsFeedFragment());
         });
 
         // post button
-        postBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (titleInput.getText() == null || contentInput.getText() == null || titleInput.getText().toString().isEmpty() || contentInput.getText().toString().isEmpty() || curImage == null || radioGroup.getCheckedRadioButtonId() == -1){
-                    Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
+        binding.post.setOnClickListener(v -> {
+            if (binding.title.getText() == null || binding.content.getText() == null || binding.title.getText().toString().isEmpty() || binding.content.getText().toString().isEmpty() || curImage == null || binding.tagsRadioGroup.getCheckedRadioButtonId() == -1){
+                Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
+            } else {
+                // save post to db
+                if (binding.learnRadio.isChecked()) {
+                    savePostToDB(binding.title.getText().toString(), binding.content.getText().toString(), "learn");
+                } else if (binding.examRadio.isChecked()) {
+                    savePostToDB(binding.title.getText().toString(), binding.content.getText().toString(), "exam");
+                } else if (binding.bill96Radio.isChecked()) {
+                    savePostToDB(binding.title.getText().toString(), binding.content.getText().toString(), "bill96");
+                } else if (binding.otherRadio.isChecked()) {
+                    savePostToDB(binding.title.getText().toString(), binding.content.getText().toString(), "other");
                 } else {
-                    // save post to db
-                    if (learnRadio.isChecked()) {
-                        savePostToDB(titleInput.getText().toString(), contentInput.getText().toString(), "learn");
-                    } else if (examRadio.isChecked()) {
-                        savePostToDB(titleInput.getText().toString(), contentInput.getText().toString(), "exam");
-                    } else if (bill96Radio.isChecked()) {
-                        savePostToDB(titleInput.getText().toString(), contentInput.getText().toString(), "bill96");
-                    } else if (otherRadio.isChecked()) {
-                        savePostToDB(titleInput.getText().toString(), contentInput.getText().toString(), "other");
-                    } else {
-                        Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
         // select image btn
-        selectImgBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickImage();
-            }
-        });
+        binding.selectImgBtn.setOnClickListener(v -> pickImage());
 
         // select image box
-        selectImgBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickImage();
-            }
-        });
+        binding.selectedImg.setOnClickListener(v -> pickImage());
     }
+
+    // =============================================== Functions ===============================================
 
     // clear all inputs
     private void clearInputs() {
-        titleInput.setText("");
-        contentInput.setText("");
+        binding.title.setText("");
+        binding.content.setText("");
         curImage = null;
-        selectImgBox.setImageResource(R.drawable.blue_rectangle_border);
-        radioGroup.clearCheck();
+        binding.selectedImg.setImageResource(R.drawable.blue_rectangle_border);
+        binding.tagsRadioGroup.clearCheck();
     }
 
     // picking image
@@ -163,7 +131,7 @@ public class NewPostFragment extends Fragment {
                 if (result.getResultCode() == Activity.RESULT_OK) {
                     Intent data = result.getData();
                     if (data != null) {
-                        selectImgBox.setImageURI(data.getData());
+                        binding.selectedImg.setImageURI(data.getData());
                         curImage = data.getData();
                     }
                 }
@@ -187,46 +155,29 @@ public class NewPostFragment extends Fragment {
         db.collection("posts")
                 .document(postID)
                 .set(post)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        // save image to storage
-                        saveImageToStorage(postID, curImage);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                .addOnSuccessListener(unused -> saveImageToStorage(postID, curImage)) // save image to storage
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show());
     }
 
     // save image to storage
     private void saveImageToStorage(String postID, Uri image) {
         StorageReference storageRef = storage.getReference();
         StorageReference postImgRef = storageRef.child("posts/" + postID);
-        postImgRef.putFile(image).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // toast success message
-                Toast.makeText(requireContext(), "New admin post posted.", Toast.LENGTH_SHORT).show();
+        postImgRef.putFile(image).addOnSuccessListener(taskSnapshot -> {
+            // toast success message
+            Toast.makeText(requireContext(), "New admin post posted.", Toast.LENGTH_SHORT).show();
 
-                // update view model current post
-                viewModel.setCurrentPostID(postID);
+            // update view model current post
+            viewModel.setCurrentPostID(postID);
 
-                // go to post page
-                loadFragment(new PostFragment());
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                // saving image to storage failed, delete post from database
-                db.collection("posts").document(postID).delete();
+            // go to post page
+            loadFragment(new PostFragment());
+        }).addOnFailureListener(e -> {
+            // saving image to storage failed, delete post from database
+            db.collection("posts").document(postID).delete();
 
-                // toast error message
-                Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show();
-            }
+            // toast error message
+            Toast.makeText(requireContext(), "Error posting new admin post.", Toast.LENGTH_SHORT).show();
         });
     }
 }

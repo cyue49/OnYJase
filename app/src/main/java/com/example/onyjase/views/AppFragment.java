@@ -130,21 +130,15 @@ public class AppFragment extends Fragment {
         LinearLayout optionPost = dialog.findViewById(R.id.writeNewPost);
 
         // new blog
-        optionBlog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new NewBlogFragment());
-                dialog.dismiss();
-            }
+        optionBlog.setOnClickListener(v -> {
+            loadFragment(new NewBlogFragment());
+            dialog.dismiss();
         });
 
         // new post
-        optionPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new NewPostFragment());
-                dialog.dismiss();
-            }
+        optionPost.setOnClickListener(v -> {
+            loadFragment(new NewPostFragment());
+            dialog.dismiss();
         });
 
         dialog.show();

@@ -39,12 +39,7 @@ import java.util.UUID;
 public class NewBlogFragment extends Fragment {
     FragmentNewBlogBinding binding;
 
-    // ui components variables
-    Button cancelBtn, postBtn;
-    TextInputEditText titleInput, contentInput;
-
     // selecting image
-    ImageView selectImgBtn, selectImgBox;
     Uri curImage;
 
     // firebase firestore
@@ -73,62 +68,42 @@ public class NewBlogFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // initializing variables
-        cancelBtn = binding.cancel;
-        postBtn = binding.post;
-        titleInput = binding.title;
-        contentInput = binding.content;
-        selectImgBtn = binding.selectImgBtn;
-        selectImgBox = binding.selectedImg;
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
-        // cancel button
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clearInputs();
-                loadFragment(new BlogsFeedFragment());
-            }
+        // cancel button listener
+        binding.cancel.setOnClickListener(v -> {
+            clearInputs();
+            loadFragment(new BlogsFeedFragment());
         });
 
         // post button
-        postBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (titleInput.getText() == null || contentInput.getText() == null || titleInput.getText().toString().isEmpty() || contentInput.getText().toString().isEmpty() || curImage == null) {
-                    Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
-                } else {
-                    // save blog to db
-                    saveBlogToDB(titleInput.getText().toString(), contentInput.getText().toString());
-                }
+        binding.post.setOnClickListener(v -> {
+            if (binding.title.getText() == null || binding.content.getText() == null || binding.title.getText().toString().isEmpty() || binding.content.getText().toString().isEmpty() || curImage == null) {
+                Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
+            } else {
+                // save blog to db
+                saveBlogToDB(binding.title.getText().toString(), binding.content.getText().toString());
             }
         });
 
         // select image btn
-        selectImgBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickImage();
-            }
-        });
+        binding.selectImgBtn.setOnClickListener(v -> pickImage());
 
         // select image box
-        selectImgBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickImage();
-            }
-        });
+        binding.selectedImg.setOnClickListener(v -> pickImage());
     }
 
     // clear all inputs
     private void clearInputs() {
-        titleInput.setText("");
-        contentInput.setText("");
+        binding.title.setText("");
+        binding.content.setText("");
         curImage = null;
-        selectImgBox.setImageResource(R.drawable.blue_rectangle_border);
+        binding.selectedImg.setImageResource(R.drawable.blue_rectangle_border);
     }
+
+    // =============================================== Functions ===============================================
 
     // picking image
     private void pickImage() {
@@ -142,7 +117,7 @@ public class NewBlogFragment extends Fragment {
                 if (result.getResultCode() == Activity.RESULT_OK) {
                     Intent data = result.getData();
                     if (data != null) {
-                        selectImgBox.setImageURI(data.getData());
+                        binding.selectedImg.setImageURI(data.getData());
                         curImage = data.getData();
                     }
                 }
@@ -166,46 +141,29 @@ public class NewBlogFragment extends Fragment {
         db.collection("blogs")
                 .document(blogID)
                 .set(blog)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        // save image to storage
-                        saveImageToStorage(blogID, curImage);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(requireContext(), "Error posting new blog.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                .addOnSuccessListener(unused -> saveImageToStorage(blogID, curImage)) // save image to storage
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error posting new blog.", Toast.LENGTH_SHORT).show());
     }
 
     // save image to storage
     private void saveImageToStorage(String blogID, Uri image) {
         StorageReference storageRef = storage.getReference();
         StorageReference blogImgRef = storageRef.child("blogs/" + blogID);
-        blogImgRef.putFile(image).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // toast success message
-                Toast.makeText(requireContext(), "New blog posted.", Toast.LENGTH_SHORT).show();
+        blogImgRef.putFile(image).addOnSuccessListener(taskSnapshot -> {
+            // toast success message
+            Toast.makeText(requireContext(), "New blog posted.", Toast.LENGTH_SHORT).show();
 
-                // update view model current blog
-                viewModel.setCurrentBlogID(blogID);
+            // update view model current blog
+            viewModel.setCurrentBlogID(blogID);
 
-                // go to blog page
-                loadFragment(new BlogFragment());
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                // saving image to storage failed, delete blog from database
-                db.collection("blogs").document(blogID).delete();
+            // go to blog page
+            loadFragment(new BlogFragment());
+        }).addOnFailureListener(e -> {
+            // saving image to storage failed, delete blog from database
+            db.collection("blogs").document(blogID).delete();
 
-                // toast error message
-                Toast.makeText(requireContext(), "Error posting new blog.", Toast.LENGTH_SHORT).show();
-            }
+            // toast error message
+            Toast.makeText(requireContext(), "Error posting new blog.", Toast.LENGTH_SHORT).show();
         });
     }
 }

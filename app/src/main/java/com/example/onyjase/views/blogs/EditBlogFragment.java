@@ -34,12 +34,7 @@ import com.google.firebase.storage.StorageReference;
 public class EditBlogFragment extends Fragment {
     FragmentEditBlogBinding binding;
 
-    // ui components variables
-    Button cancelBtn, updateBtn;
-    TextInputEditText titleInput, contentInput;
-
     // selecting image
-    ImageView selectImgBtn, selectImgBox;
     Uri curImage;
 
     // firebase firestore
@@ -68,12 +63,6 @@ public class EditBlogFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // initializing variables
-        cancelBtn = binding.cancel;
-        updateBtn = binding.update;
-        titleInput = binding.title;
-        contentInput = binding.content;
-        selectImgBtn = binding.selectImgBtn;
-        selectImgBox = binding.selectedImg;
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
@@ -94,43 +83,33 @@ public class EditBlogFragment extends Fragment {
         }
 
         // cancel button
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clearInputs();
-                loadFragment(new BlogFragment());
-            }
+        binding.cancel.setOnClickListener(v -> {
+            clearInputs();
+            loadFragment(new BlogFragment());
         });
 
         // update button
-        updateBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (titleInput.getText() == null || contentInput.getText() == null || titleInput.getText().toString().isEmpty() || contentInput.getText().toString().isEmpty() || curImage == null) {
-                    Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
-                } else {
-                    // update in db
-                    // todo
-                }
+        binding.update.setOnClickListener(v -> {
+            if (binding.title.getText() == null || binding.content.getText() == null || binding.title.getText().toString().isEmpty() || binding.content.getText().toString().isEmpty() || curImage == null) {
+                Toast.makeText(requireContext(), "Please make sure all fields are filled.", Toast.LENGTH_SHORT).show();
+            } else {
+                // update in db
+                // todo
             }
         });
 
         // select image btn
-        selectImgBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // todo
-            }
+        binding.selectImgBtn.setOnClickListener(v -> {
+            // todo: handle image selection
         });
 
         // select image box
-        selectImgBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // todo
-            }
+        binding.selectedImg.setOnClickListener(v -> {
+            // todo: handle image selection
         });
     }
+
+    // =============================================== Functions ===============================================
 
     // go to another fragment
     private void loadFragment(Fragment fragment) {
@@ -142,28 +121,25 @@ public class EditBlogFragment extends Fragment {
 
     // clear all inputs
     private void clearInputs() {
-        titleInput.setText("");
-        contentInput.setText("");
+        binding.title.setText("");
+        binding.content.setText("");
         curImage = null;
-        selectImgBox.setImageResource(R.drawable.blue_rectangle_border);
+        binding.selectedImg.setImageResource(R.drawable.blue_rectangle_border);
     }
 
     // set title and content input with current blog data
     private void setBlogContent(String blogID) {
         DocumentReference docRef = db.collection("blogs").document(blogID);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()){
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()){
-                        titleInput.setText(document.getString("title"));
-                        contentInput.setText(document.getString("content"));
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
-                    loadFragment(new BlogFragment());
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()){
+                    binding.title.setText(document.getString("title"));
+                    binding.content.setText(document.getString("content"));
                 }
+            } else {
+                Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
+                loadFragment(new BlogFragment());
             }
         });
     }
@@ -172,20 +148,12 @@ public class EditBlogFragment extends Fragment {
     private void setBlogCoverImage(String imageURL) {
         StorageReference storageRef = storage.getReference();
         storageRef.child(imageURL).getDownloadUrl()
-                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        Glide.with(requireContext())
-                                .load(uri)
-                                .into(selectImgBox);
-                        curImage = uri;
-                    }
+                .addOnSuccessListener(uri -> {
+                    Glide.with(requireContext())
+                            .load(uri)
+                            .into(binding.selectedImg);
+                    curImage = uri;
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(requireContext(), "Error getting blog cover image.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error getting blog cover image.", Toast.LENGTH_SHORT).show());
     }
 }
