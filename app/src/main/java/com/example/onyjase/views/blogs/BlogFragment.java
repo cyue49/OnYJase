@@ -1,6 +1,7 @@
 package com.example.onyjase.views.blogs;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,10 +21,13 @@ import com.example.onyjase.databinding.FragmentBlogBinding;
 import com.example.onyjase.models.Blog;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -101,8 +105,14 @@ public class BlogFragment extends Fragment {
 
         // Delete button listener
         binding.deleteBtn.setOnClickListener(v -> {
-            // TODO: Handle delete blog action
-            Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
+            // show confirmation dialog for deleting blog
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+            LayoutInflater inflater = LayoutInflater.from(requireContext());
+            dialogBuilder.setView(inflater.inflate(R.layout.delete_blog_dialog, null));
+            dialogBuilder.setPositiveButton("Delete", (dialog, which) -> {
+                deleteBlogFromDb();
+            }).setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            dialogBuilder.create().show();
         });
     }
 
@@ -250,5 +260,54 @@ public class BlogFragment extends Fragment {
                 Toast.makeText(requireContext(), "Error getting current likes count.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // delete blog from db
+    private void deleteBlogFromDb() {
+        // delete the blog from database
+        String blogID = viewModel.getCurrentBlogID().getValue();
+        db.collection("blogs")
+                .document(blogID)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    // delete all comments of this blog
+                    deleteAllBlogComments(blogID);
+
+                    // delete blog cover image
+                    deleteBlogImages(blogID);
+
+                    Toast.makeText(requireContext(), "Blog deleted.", Toast.LENGTH_SHORT).show();
+                    FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
+                })
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting blog.", Toast.LENGTH_SHORT).show());
+    }
+
+    // delete all comments of blog
+    private void deleteAllBlogComments(String blogID) {
+        CollectionReference colRef = db.collection("comments");
+        Query query = colRef.whereEqualTo("blogID", blogID);
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // delete all comments of this blog
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String commentID = document.getString("commentID");
+                    colRef.document(commentID).delete();
+                }
+            } else {
+                Toast.makeText(requireContext(), "Error deleting comments.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // delete images of this blog
+    private void deleteBlogImages(String blogID) {
+        String blogImgUrl = "blogs/" + blogID;
+        StorageReference listRef = storage.getReference().child(blogImgUrl);
+        listRef.listAll()
+                .addOnSuccessListener(listResult -> {
+                    for (StorageReference item : listResult.getItems()){
+                        item.delete();
+                    }
+                }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting blog images.", Toast.LENGTH_SHORT).show());
     }
 }
