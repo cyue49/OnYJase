@@ -58,6 +58,7 @@ public class NotificationsFragment extends Fragment {
         binding.tempBtn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                viewModel.setCurrentPostID("e0869a9461654797922b462261b63504");
                 loadFragment(new PostFragment());
             }
         });

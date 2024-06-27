@@ -10,6 +10,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,7 +64,7 @@ public class EditFragment extends Fragment {
 
         binding.selectImgBtn.setOnClickListener(v -> pickImage());
         binding.selectedImg.setOnClickListener(v -> pickImage());
-        binding.cancel.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        binding.cancel.setOnClickListener(v -> loadFragment(new BlogFragment()));
         binding.update.setOnClickListener(v -> updateBlog());
     }
 
@@ -74,6 +76,7 @@ public class EditFragment extends Fragment {
                         .load(uri)
                         .placeholder(R.drawable.placeholder_image) // Placeholder image
                         .into(binding.selectedImg);
+                curImageUri = uri;
             }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error getting blog cover image.", Toast.LENGTH_SHORT).show());
         }
     }
@@ -91,17 +94,15 @@ public class EditFragment extends Fragment {
         if (blog != null) {
             String blogID = blog.getBlogID();
             String userID = blog.getUserID();
-            Date timestamp = new Date();
-            String imageURL = "blogs/" + blogID + "/cover.jpg"; // Assuming the image is stored under blogs/{blogID}/cover.jpg
+            String imageURL = "blogs/" + blogID + "/cover"; // Assuming the image is stored under blogs/{blogID}/cover
 
             StorageReference imageRef = storage.getReference().child(imageURL);
             imageRef.putFile(curImageUri).addOnSuccessListener(taskSnapshot -> {
                 imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                     Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, blog.getLikes());
                     db.collection("blogs").document(blogID).set(updatedBlog).addOnSuccessListener(aVoid -> {
-                        viewModel.setCurrentBlog(updatedBlog);
                         Toast.makeText(requireContext(), "Blog updated successfully", Toast.LENGTH_SHORT).show();
-                        getParentFragmentManager().popBackStack();
+                        loadFragment(new BlogFragment());
                     }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating blog.", Toast.LENGTH_SHORT).show());
                 }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error getting image URL.", Toast.LENGTH_SHORT).show());
             }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error uploading image.", Toast.LENGTH_SHORT).show());
@@ -131,5 +132,12 @@ public class EditFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void loadFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.commit();
     }
 }
