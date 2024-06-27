@@ -34,6 +34,7 @@ import com.example.onyjase.models.stickers.Sticker;
 import com.example.onyjase.models.stickers.StickerImage;
 import com.example.onyjase.models.stickers.StickerImages;
 import com.example.onyjase.models.stickers.Stickers;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.utils.StickersService;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -117,7 +118,7 @@ public class BlogFragment extends Fragment {
             setLikeIcon(currentBlogID);
         } else {
             Toast.makeText(requireContext(), "Error fetching blog.", Toast.LENGTH_SHORT).show();
-            loadFragment(new BlogsFeedFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
         }
 
         // =============================================== Buttons Listeners ===============================================
@@ -128,11 +129,11 @@ public class BlogFragment extends Fragment {
         });
 
         // Back button listener
-        binding.backBtn.setOnClickListener(v -> loadFragment(new BlogsFeedFragment()));
+        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment()));
 
         // Edit button listener
         binding.editBtn.setOnClickListener(v -> {
-            loadFragment(new EditFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new EditFragment());
         });
 
         // Delete button listener
@@ -143,14 +144,6 @@ public class BlogFragment extends Fragment {
     }
 
     // =============================================== Functions ===============================================
-
-    // go to another fragment
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
-    }
 
     // set the title, content, date, and number of likes for the current blog
     private void setBlogContent(String blogID) {
@@ -186,7 +179,7 @@ public class BlogFragment extends Fragment {
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
-                loadFragment(new BlogsFeedFragment());
+                FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
             }
         });
     }

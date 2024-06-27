@@ -15,6 +15,7 @@ import com.example.onyjase.R;
 import com.example.onyjase.adapters.MyPostsAdapter;
 import com.example.onyjase.databinding.FragmentMyPostsBinding;
 import com.example.onyjase.models.Blog;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogFragment;
 import com.example.onyjase.views.blogs.EditFragment;
@@ -46,7 +47,7 @@ public class MyPostsFragment extends Fragment {
             @Override
             public void onEditClick(Blog post) {
                 viewModel.setCurrentBlog(post);
-                loadFragment(new EditFragment());
+                FragmentTransactionHelper.loadFragment(requireContext(), new EditFragment());
             }
 
             @Override
@@ -56,8 +57,8 @@ public class MyPostsFragment extends Fragment {
 
             @Override
             public void onPostClick(Blog post) {
-                viewModel.setCurrentBlog(post);
-                loadFragment(new BlogFragment());
+                viewModel.setCurrentBlogID(post.getBlogID());
+                FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
             }
         });
 
@@ -88,13 +89,6 @@ public class MyPostsFragment extends Fragment {
                 .addOnFailureListener(e -> {
                     // Handle error
                 });
-    }
-
-    private void loadFragment(Fragment fragment) {
-        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragmentContainerView, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
     }
 
     @Override

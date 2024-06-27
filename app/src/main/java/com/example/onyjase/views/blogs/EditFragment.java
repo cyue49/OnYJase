@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentEditBinding;
 import com.example.onyjase.models.Blog;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -64,7 +65,7 @@ public class EditFragment extends Fragment {
 
         binding.selectImgBtn.setOnClickListener(v -> pickImage());
         binding.selectedImg.setOnClickListener(v -> pickImage());
-        binding.cancel.setOnClickListener(v -> loadFragment(new BlogFragment()));
+        binding.cancel.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment()));
         binding.update.setOnClickListener(v -> updateBlog());
     }
 
@@ -102,7 +103,7 @@ public class EditFragment extends Fragment {
                     Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, blog.getLikes());
                     db.collection("blogs").document(blogID).set(updatedBlog).addOnSuccessListener(aVoid -> {
                         Toast.makeText(requireContext(), "Blog updated successfully", Toast.LENGTH_SHORT).show();
-                        loadFragment(new BlogFragment());
+                        FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
                     }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating blog.", Toast.LENGTH_SHORT).show());
                 }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error getting image URL.", Toast.LENGTH_SHORT).show());
             }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error uploading image.", Toast.LENGTH_SHORT).show());
@@ -132,12 +133,5 @@ public class EditFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-    }
-
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
     }
 }
