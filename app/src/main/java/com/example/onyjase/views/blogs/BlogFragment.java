@@ -215,7 +215,7 @@ public class BlogFragment extends Fragment {
                             .load(uri)
                             .into(binding.coverImage);
                 })
-                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error getting blog cover image.", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> binding.coverImage.setImageResource(R.drawable.blue_rectangle_border));
     }
 
     // set blog like icon depending on if current user like it or not

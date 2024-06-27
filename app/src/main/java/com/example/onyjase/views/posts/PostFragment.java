@@ -150,6 +150,6 @@ public class PostFragment extends Fragment {
                             .load(uri)
                             .into(binding.coverImg);
                 })
-                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error getting post cover image.", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> binding.coverImg.setImageResource(R.drawable.blue_rectangle_border));
     }
 }
