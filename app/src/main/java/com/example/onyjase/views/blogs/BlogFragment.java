@@ -276,22 +276,43 @@ public class BlogFragment extends Fragment {
 
     // delete blog from db
     private void deleteBlogFromDb() {
-        // delete the blog from database
         String blogID = viewModel.getCurrentBlogID().getValue();
-        db.collection("blogs")
-                .document(blogID)
-                .delete()
-                .addOnSuccessListener(unused -> {
-                    // delete all comments of this blog
-                    deleteAllBlogComments(blogID);
 
-                    // delete blog cover image
-                    deleteBlogImages(blogID);
+        // delete all comments of this blog
+        deleteAllBlogComments(blogID);
 
-                    Toast.makeText(requireContext(), "Blog deleted.", Toast.LENGTH_SHORT).show();
-                    FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
-                })
-                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting blog.", Toast.LENGTH_SHORT).show());
+        // delete blog cover image
+        deleteBlogImages(blogID);
+
+        // delete this blog from other user's favorites
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    // get list of all user ids of users that liked this blog
+                    List<String> likedBy = (List<String>) document.get("likedBy");
+                    for (String id : likedBy) { // for each user id, delete blogID from their favorites
+                        db.collection("users").document(id)
+                                .update("favorites", FieldValue.arrayRemove(blogID)).addOnCompleteListener(task2 -> {
+                                    if (task2.isSuccessful()) {
+                                        // do nothing
+                                    } else {
+                                        Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+
+                     // delete the blog from db
+                    docRef.delete()
+                            .addOnSuccessListener(unused -> {
+                                Toast.makeText(requireContext(), "Blog deleted.", Toast.LENGTH_SHORT).show();
+                                FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting blog.", Toast.LENGTH_SHORT).show());
+                }
+            }
+        });
     }
 
     // delete all comments of blog
