@@ -150,7 +150,7 @@ public class NewPostFragment extends Fragment {
     private void savePostToDB(String title, String content, String tag) {
         String userID = viewModel.getUser().getValue().getUserID();
         String postID = UUID.randomUUID().toString().replace("-", "");
-        Post post = new Post(postID, userID, title, content, tag, "posts/" + postID);
+        Post post = new Post(postID, userID, title, content, tag, "posts/" + postID + "/cover.jpg");
 
         db.collection("posts")
                 .document(postID)

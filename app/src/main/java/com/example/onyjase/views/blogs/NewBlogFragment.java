@@ -136,7 +136,7 @@ public class NewBlogFragment extends Fragment {
     private void saveBlogToDB(String title, String content) {
         String userID = viewModel.getUser().getValue().getUserID();
         String blogID = UUID.randomUUID().toString().replace("-", "");
-        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID, 0);
+        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID + "/cover.jpg", 0);
 
         db.collection("blogs")
                 .document(blogID)
