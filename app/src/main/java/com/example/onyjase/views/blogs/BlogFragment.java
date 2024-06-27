@@ -132,7 +132,8 @@ public class BlogFragment extends Fragment {
                         binding.deleteBtn.setVisibility(View.VISIBLE);
 
                         // set current blog in view model
-                        viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue()));
+                        List<String> likedBy = (List<String>) document.get("likedBy");
+                        viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue(), likedBy));
                     }
 
                     // set blog cover image
@@ -247,12 +248,23 @@ public class BlogFragment extends Fragment {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                     int curLikes = document.getDouble("likes").intValue();
+                    // update likes count
                     docRef.update("likes", isAdd ? curLikes + 1 : curLikes - 1).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             binding.likeIcon.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
                             binding.likes.setText(String.valueOf(isAdd ? curLikes + 1 : curLikes - 1));
                         } else {
                             Toast.makeText(requireContext(), "Error updating likes count.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    // update liked by
+                    String userID = viewModel.getUser().getValue().getUserID();
+                    docRef.update("likedBy", isAdd ? FieldValue.arrayUnion(userID): FieldValue.arrayRemove(userID)).addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            // do nothing
+                        } else {
+                            Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }

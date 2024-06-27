@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class EditFragment extends Fragment {
     private FragmentEditBinding binding;
@@ -96,11 +97,12 @@ public class EditFragment extends Fragment {
             String blogID = blog.getBlogID();
             String userID = blog.getUserID();
             String imageURL = "blogs/" + blogID + "/cover"; // Assuming the image is stored under blogs/{blogID}/cover
+            List<String> likedBy = blog.getLikedBy();
 
             StorageReference imageRef = storage.getReference().child(imageURL);
             imageRef.putFile(curImageUri).addOnSuccessListener(taskSnapshot -> {
                 imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, blog.getLikes());
+                    Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, blog.getLikes(), likedBy);
                     db.collection("blogs").document(blogID).set(updatedBlog).addOnSuccessListener(aVoid -> {
                         Toast.makeText(requireContext(), "Blog updated successfully", Toast.LENGTH_SHORT).show();
                         FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
