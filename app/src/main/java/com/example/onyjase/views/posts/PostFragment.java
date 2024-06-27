@@ -1,5 +1,6 @@
 package com.example.onyjase.views.posts;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,6 +18,7 @@ import com.example.onyjase.databinding.FragmentPostBinding;
 import com.example.onyjase.models.Post;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.example.onyjase.views.blogs.BlogsFeedFragment;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -83,8 +85,14 @@ public class PostFragment extends Fragment {
 
         // delete button
         binding.deleteBtn.setOnClickListener(v -> {
-            // todo: handle delete
-            Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
+            // show confirmation dialog for deleting admin post
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+            LayoutInflater inflater = LayoutInflater.from(requireContext());
+            dialogBuilder.setView(inflater.inflate(R.layout.delete_blog_dialog, null));
+            dialogBuilder.setPositiveButton("Delete", (dialog, which) -> {
+                deletePostFromDb();
+            }).setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            dialogBuilder.create().show();
         });
     }
 
@@ -133,5 +141,28 @@ public class PostFragment extends Fragment {
                             .into(binding.coverImg);
                 })
                 .addOnFailureListener(e -> binding.coverImg.setImageResource(R.drawable.blue_rectangle_border));
+    }
+
+    // delete post from db
+    private void deletePostFromDb() {
+        String postID = viewModel.getCurrentPostID().getValue();
+
+        // delete post from db
+        DocumentReference docRef = db.collection("posts").document(postID);
+        docRef.delete()
+                .addOnSuccessListener(unused -> {
+                    // delete post cover image
+                    String postImgUrl = "posts/" + postID;
+                    StorageReference listRef = storage.getReference().child(postImgUrl);
+                    listRef.listAll()
+                            .addOnSuccessListener(listResult -> {
+                                for (StorageReference item : listResult.getItems()){
+                                    item.delete();
+                                }
+                                Toast.makeText(requireContext(), "Admin post deleted.", Toast.LENGTH_SHORT).show();
+                                FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
+                            }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting admin post images.", Toast.LENGTH_SHORT).show());
+                })
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting admin post.", Toast.LENGTH_SHORT).show());
     }
 }
