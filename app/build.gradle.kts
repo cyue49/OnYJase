@@ -63,5 +63,4 @@ dependencies {
     // retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
-    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
 }
