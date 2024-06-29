@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.ItemMyBlogBinding;
 import com.example.onyjase.models.Blog;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogFragment;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -77,7 +78,7 @@ public class MyBlogsAdapter extends RecyclerView.Adapter<MyBlogsAdapter.BlogView
         // Set click listeners to navigate to BlogFragment
         View.OnClickListener listener = v -> {
             viewModel.setCurrentBlogID(blog.getBlogID());
-            loadFragment(new BlogFragment());
+            FragmentTransactionHelper.loadFragment(context, new BlogFragment());
         };
         holder.binding.blogImage.setOnClickListener(listener);
         holder.binding.blogTitle.setOnClickListener(listener);
@@ -110,12 +111,5 @@ public class MyBlogsAdapter extends RecyclerView.Adapter<MyBlogsAdapter.BlogView
     public void setBlogs(List<Blog> blogs) {
         this.blogs = blogs;
         notifyDataSetChanged();
-    }
-
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, fragment)
-                .commit();
     }
 }

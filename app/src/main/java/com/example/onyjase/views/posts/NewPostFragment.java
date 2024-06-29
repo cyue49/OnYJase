@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentNewPostBinding;
 import com.example.onyjase.models.Post;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.posts.PostFragment;
 import com.example.onyjase.views.posts.PostsFeedFragment;
@@ -78,7 +79,7 @@ public class NewPostFragment extends Fragment {
         // cancel button
         binding.cancel.setOnClickListener(v -> {
             clearInputs();
-            loadFragment(new PostsFeedFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
         });
 
         // post button
@@ -138,14 +139,6 @@ public class NewPostFragment extends Fragment {
             }
     );
 
-    // go to another fragment
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
-    }
-
     // save post to db
     private void savePostToDB(String title, String content, String tag) {
         String userID = viewModel.getUser().getValue().getUserID();
@@ -171,7 +164,7 @@ public class NewPostFragment extends Fragment {
             viewModel.setCurrentPostID(postID);
 
             // go to post page
-            loadFragment(new PostFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment());
         }).addOnFailureListener(e -> {
             // saving image to storage failed, delete post from database
             db.collection("posts").document(postID).delete();

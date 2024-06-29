@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentNewBlogBinding;
 import com.example.onyjase.models.Blog;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -32,6 +33,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -75,7 +77,7 @@ public class NewBlogFragment extends Fragment {
         // cancel button listener
         binding.cancel.setOnClickListener(v -> {
             clearInputs();
-            loadFragment(new BlogsFeedFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
         });
 
         // post button
@@ -124,19 +126,11 @@ public class NewBlogFragment extends Fragment {
             }
             );
 
-    // go to another fragment
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
-    }
-
     // save blog to db
     private void saveBlogToDB(String title, String content) {
         String userID = viewModel.getUser().getValue().getUserID();
         String blogID = UUID.randomUUID().toString().replace("-", "");
-        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID + "/cover", 0);
+        Blog blog = new Blog(blogID, userID, title, content, "blogs/" + blogID + "/cover", 0, new ArrayList<>());
 
         db.collection("blogs")
                 .document(blogID)
@@ -157,7 +151,7 @@ public class NewBlogFragment extends Fragment {
             viewModel.setCurrentBlogID(blogID);
 
             // go to blog page
-            loadFragment(new BlogFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
         }).addOnFailureListener(e -> {
             // saving image to storage failed, delete blog from database
             db.collection("blogs").document(blogID).delete();

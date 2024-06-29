@@ -22,7 +22,10 @@ import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentEditBinding;
 import com.example.onyjase.models.Blog;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -31,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class EditFragment extends Fragment {
     private FragmentEditBinding binding;
@@ -64,10 +68,11 @@ public class EditFragment extends Fragment {
 
         binding.selectImgBtn.setOnClickListener(v -> pickImage());
         binding.selectedImg.setOnClickListener(v -> pickImage());
-        binding.cancel.setOnClickListener(v -> loadFragment(new BlogFragment()));
+        binding.cancel.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment()));
         binding.update.setOnClickListener(v -> updateBlog());
     }
 
+    // set blog cover image
     private void setBlogCoverImage(String imageURL) {
         if (imageURL != null && !imageURL.isEmpty()) {
             StorageReference storageRef = storage.getReference().child(imageURL);
@@ -81,6 +86,7 @@ public class EditFragment extends Fragment {
         }
     }
 
+    // update blog in db
     private void updateBlog() {
         String title = binding.title.getText().toString();
         String content = binding.content.getText().toString();
@@ -96,16 +102,27 @@ public class EditFragment extends Fragment {
             String userID = blog.getUserID();
             String imageURL = "blogs/" + blogID + "/cover"; // Assuming the image is stored under blogs/{blogID}/cover
 
-            StorageReference imageRef = storage.getReference().child(imageURL);
-            imageRef.putFile(curImageUri).addOnSuccessListener(taskSnapshot -> {
-                imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, blog.getLikes());
-                    db.collection("blogs").document(blogID).set(updatedBlog).addOnSuccessListener(aVoid -> {
-                        Toast.makeText(requireContext(), "Blog updated successfully", Toast.LENGTH_SHORT).show();
-                        loadFragment(new BlogFragment());
-                    }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating blog.", Toast.LENGTH_SHORT).show());
-                }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error getting image URL.", Toast.LENGTH_SHORT).show());
-            }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error uploading image.", Toast.LENGTH_SHORT).show());
+            // get most recent likes count and liked by before saving to db
+            DocumentReference docRef = db.collection("blogs").document(blogID);
+            docRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        int likesCount = document.getDouble("likes").intValue();
+                        List<String> likedBy = (List<String>) document.get("likedBy");
+
+                        Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, likesCount, likedBy);
+
+                        StorageReference imageRef = storage.getReference().child(imageURL);
+                        imageRef.putFile(curImageUri).addOnSuccessListener(taskSnapshot -> {
+                            db.collection("blogs").document(blogID).set(updatedBlog).addOnSuccessListener(aVoid -> {
+                                Toast.makeText(requireContext(), "Blog updated successfully", Toast.LENGTH_SHORT).show();
+                                FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+                            }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating blog.", Toast.LENGTH_SHORT).show());
+                        }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error uploading image.", Toast.LENGTH_SHORT).show());
+                    }
+                }
+            });
         }
     }
 
@@ -132,12 +149,5 @@ public class EditFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-    }
-
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
     }
 }

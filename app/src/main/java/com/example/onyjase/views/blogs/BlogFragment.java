@@ -1,8 +1,7 @@
 package com.example.onyjase.views.blogs;
 
 import android.annotation.SuppressLint;
-import android.graphics.Typeface;
-import android.net.Uri;
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,37 +9,18 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
-import com.example.onyjase.adapters.CommentAdapter;
-import com.example.onyjase.adapters.StickerAdapter;
 import com.example.onyjase.databinding.FragmentBlogBinding;
 import com.example.onyjase.models.Blog;
-import com.example.onyjase.models.Comment;
-import com.example.onyjase.models.stickers.Sticker;
-import com.example.onyjase.models.stickers.StickerImage;
-import com.example.onyjase.models.stickers.StickerImages;
-import com.example.onyjase.models.stickers.Stickers;
-import com.example.onyjase.utils.StickersService;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -48,23 +28,11 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 // Fragment for a single blog
 public class BlogFragment extends Fragment {
@@ -117,7 +85,7 @@ public class BlogFragment extends Fragment {
             setLikeIcon(currentBlogID);
         } else {
             Toast.makeText(requireContext(), "Error fetching blog.", Toast.LENGTH_SHORT).show();
-            loadFragment(new BlogsFeedFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
         }
 
         // =============================================== Buttons Listeners ===============================================
@@ -128,29 +96,27 @@ public class BlogFragment extends Fragment {
         });
 
         // Back button listener
-        binding.backBtn.setOnClickListener(v -> loadFragment(new BlogsFeedFragment()));
+        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment()));
 
         // Edit button listener
         binding.editBtn.setOnClickListener(v -> {
-            loadFragment(new EditFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new EditFragment());
         });
 
         // Delete button listener
         binding.deleteBtn.setOnClickListener(v -> {
-            // TODO: Handle delete blog action
-            Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
+            // show confirmation dialog for deleting blog
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+            LayoutInflater inflater = LayoutInflater.from(requireContext());
+            dialogBuilder.setView(inflater.inflate(R.layout.delete_blog_dialog, null));
+            dialogBuilder.setPositiveButton("Delete", (dialog, which) -> {
+                deleteBlogFromDb();
+            }).setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            dialogBuilder.create().show();
         });
     }
 
     // =============================================== Functions ===============================================
-
-    // go to another fragment
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
-    }
 
     // set the title, content, date, and number of likes for the current blog
     private void setBlogContent(String blogID) {
@@ -166,7 +132,13 @@ public class BlogFragment extends Fragment {
                         binding.deleteBtn.setVisibility(View.VISIBLE);
 
                         // set current blog in view model
-                        viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue()));
+                        List<String> likedBy = (List<String>) document.get("likedBy");
+                        viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue(), likedBy));
+                    }
+
+                    // if user is admin, show delete button
+                    if (viewModel.getUser().getValue().getRole().equals("admin")) {
+                        binding.deleteBtn.setVisibility(View.VISIBLE);
                     }
 
                     // set blog cover image
@@ -186,7 +158,7 @@ public class BlogFragment extends Fragment {
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting blog content.", Toast.LENGTH_SHORT).show();
-                loadFragment(new BlogsFeedFragment());
+                FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
             }
         });
     }
@@ -281,6 +253,7 @@ public class BlogFragment extends Fragment {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                     int curLikes = document.getDouble("likes").intValue();
+                    // update likes count
                     docRef.update("likes", isAdd ? curLikes + 1 : curLikes - 1).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             binding.likeIcon.setImageResource(isAdd ? R.drawable.blue_heart : R.drawable.gray_heart);
@@ -289,10 +262,90 @@ public class BlogFragment extends Fragment {
                             Toast.makeText(requireContext(), "Error updating likes count.", Toast.LENGTH_SHORT).show();
                         }
                     });
+
+                    // update liked by
+                    String userID = viewModel.getUser().getValue().getUserID();
+                    docRef.update("likedBy", isAdd ? FieldValue.arrayUnion(userID): FieldValue.arrayRemove(userID)).addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            // do nothing
+                        } else {
+                            Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting current likes count.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // delete blog from db
+    private void deleteBlogFromDb() {
+        String blogID = viewModel.getCurrentBlogID().getValue();
+
+        // delete all comments of this blog
+        deleteAllBlogComments(blogID);
+
+        // delete blog cover image
+        deleteBlogImages(blogID);
+
+        // delete this blog from other user's favorites
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    // get list of all user ids of users that liked this blog
+                    List<String> likedBy = (List<String>) document.get("likedBy");
+                    for (String id : likedBy) { // for each user id, delete blogID from their favorites
+                        db.collection("users").document(id)
+                                .update("favorites", FieldValue.arrayRemove(blogID)).addOnCompleteListener(task2 -> {
+                                    if (task2.isSuccessful()) {
+                                        // do nothing
+                                    } else {
+                                        Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+
+                     // delete the blog from db
+                    docRef.delete()
+                            .addOnSuccessListener(unused -> {
+                                Toast.makeText(requireContext(), "Blog deleted.", Toast.LENGTH_SHORT).show();
+                                FragmentTransactionHelper.loadFragment(requireContext(), new BlogsFeedFragment());
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting blog.", Toast.LENGTH_SHORT).show());
+                }
+            }
+        });
+    }
+
+    // delete all comments of blog
+    private void deleteAllBlogComments(String blogID) {
+        CollectionReference colRef = db.collection("comments");
+        Query query = colRef.whereEqualTo("blogID", blogID);
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // delete all comments of this blog
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String commentID = document.getString("commentID");
+                    colRef.document(commentID).delete();
+                }
+            } else {
+                Toast.makeText(requireContext(), "Error deleting comments.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // delete images of this blog
+    private void deleteBlogImages(String blogID) {
+        String blogImgUrl = "blogs/" + blogID;
+        StorageReference listRef = storage.getReference().child(blogImgUrl);
+        listRef.listAll()
+                .addOnSuccessListener(listResult -> {
+                    for (StorageReference item : listResult.getItems()){
+                        item.delete();
+                    }
+                }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting blog images.", Toast.LENGTH_SHORT).show());
     }
 }

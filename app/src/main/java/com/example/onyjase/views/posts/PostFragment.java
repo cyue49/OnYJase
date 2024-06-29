@@ -1,32 +1,24 @@
 package com.example.onyjase.views.posts;
 
-import android.net.Uri;
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentPostBinding;
 import com.example.onyjase.models.Post;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+import com.example.onyjase.views.blogs.BlogsFeedFragment;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -80,33 +72,31 @@ public class PostFragment extends Fragment {
             setPostCoverImage("posts/" + currentPostID);
         } else {
             Toast.makeText(requireContext(), "Error fetching post.", Toast.LENGTH_SHORT).show();
-            loadFragment(new PostsFeedFragment());
+            FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
         }
 
         // =============================================== Buttons Listeners ===============================================
 
         // back button
-        binding.backBtn.setOnClickListener(v -> loadFragment(new PostsFeedFragment()));
+        binding.backBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment()));
 
         // edit button
-        binding.editBtn.setOnClickListener(v -> loadFragment(new EditPostFragment()));
+        binding.editBtn.setOnClickListener(v -> FragmentTransactionHelper.loadFragment(requireContext(), new EditPostFragment()));
 
         // delete button
         binding.deleteBtn.setOnClickListener(v -> {
-            // todo: handle delete
-            Toast.makeText(requireContext(), "Delete clicked.", Toast.LENGTH_SHORT).show();
+            // show confirmation dialog for deleting admin post
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+            LayoutInflater inflater = LayoutInflater.from(requireContext());
+            dialogBuilder.setView(inflater.inflate(R.layout.delete_blog_dialog, null));
+            dialogBuilder.setPositiveButton("Delete", (dialog, which) -> {
+                deletePostFromDb();
+            }).setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            dialogBuilder.create().show();
         });
     }
 
     // =============================================== Functions ===============================================
-
-    // go to another fragment
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
-    }
 
     // set the title and content of the post
     private void setPostContent(String postID) {
@@ -136,7 +126,7 @@ public class PostFragment extends Fragment {
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting post content.", Toast.LENGTH_SHORT).show();
-                loadFragment(new PostsFeedFragment());
+                FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
             }
         });
     }
@@ -151,5 +141,28 @@ public class PostFragment extends Fragment {
                             .into(binding.coverImg);
                 })
                 .addOnFailureListener(e -> binding.coverImg.setImageResource(R.drawable.blue_rectangle_border));
+    }
+
+    // delete post from db
+    private void deletePostFromDb() {
+        String postID = viewModel.getCurrentPostID().getValue();
+
+        // delete post from db
+        DocumentReference docRef = db.collection("posts").document(postID);
+        docRef.delete()
+                .addOnSuccessListener(unused -> {
+                    // delete post cover image
+                    String postImgUrl = "posts/" + postID;
+                    StorageReference listRef = storage.getReference().child(postImgUrl);
+                    listRef.listAll()
+                            .addOnSuccessListener(listResult -> {
+                                for (StorageReference item : listResult.getItems()){
+                                    item.delete();
+                                }
+                                Toast.makeText(requireContext(), "Admin post deleted.", Toast.LENGTH_SHORT).show();
+                                FragmentTransactionHelper.loadFragment(requireContext(), new PostsFeedFragment());
+                            }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting admin post images.", Toast.LENGTH_SHORT).show());
+                })
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting admin post.", Toast.LENGTH_SHORT).show());
     }
 }
