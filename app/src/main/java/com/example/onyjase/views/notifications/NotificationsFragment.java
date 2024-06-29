@@ -47,21 +47,5 @@ public class NotificationsFragment extends Fragment {
 
         // initializing variables
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
-
-        binding.tempBtn1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewModel.setCurrentBlogID("187385f6f3554765934e005793cd0b55");
-                FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
-            }
-        });
-
-        binding.tempBtn2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewModel.setCurrentPostID("e0869a9461654797922b462261b63504");
-                FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment());
-            }
-        });
     }
 }
