@@ -51,7 +51,6 @@ public class SignInFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Check Firebase connection
         db.collection("test").document("connection").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -78,7 +77,7 @@ public class SignInFragment extends Fragment {
 
         userSignInBtn = binding.button;
         toSignUpBtn = binding.button2;
-        adminSignInBtn = binding.button3;
+//        adminSignInBtn = binding.button3;
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         userSignInBtn.setOnClickListener(new View.OnClickListener() {
@@ -90,14 +89,14 @@ public class SignInFragment extends Fragment {
             }
         });
 
-        adminSignInBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = binding.emailEditText.getText().toString();
-                String password = binding.passwordEditText.getText().toString();
-                signInUser(email, password, "admin");
-            }
-        });
+//        adminSignInBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String email = binding.emailEditText.getText().toString();
+//                String password = binding.passwordEditText.getText().toString();
+//                signInUser(email, password, "admin");
+//            }
+//        });
 
         toSignUpBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,7 +112,6 @@ public class SignInFragment extends Fragment {
             return;
         }
 
-        // Check if the user exists in the Firestore database
         db.collection("users").whereEqualTo("email", email).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -138,19 +136,19 @@ public class SignInFragment extends Fragment {
                                                         viewModel.setUser(userModel);
                                                         navController.navigate(R.id.action_signInFragment_to_appFragment); // Navigate to user screen
                                                     } else {
-                                                        // Handle role mismatch
+
                                                         Log.d(TAG, "Role mismatch.");
                                                         mAuth.signOut();
                                                         Toast.makeText(getContext(), "Role mismatch. Please check your credentials.", Toast.LENGTH_SHORT).show();
                                                     }
                                                 } else {
-                                                    // Handle user document not found
+
                                                     Log.d(TAG, "User document not found.");
                                                     mAuth.signOut();
                                                     Toast.makeText(getContext(), "User document not found.", Toast.LENGTH_SHORT).show();
                                                 }
                                             } else {
-                                                // Handle task failure
+
                                                 Log.d(TAG, "Failed to get user document.", task.getException());
                                                 mAuth.signOut();
                                                 Toast.makeText(getContext(), "Failed to get user document.", Toast.LENGTH_SHORT).show();
@@ -159,7 +157,6 @@ public class SignInFragment extends Fragment {
                                     });
                                 }
                             } else {
-                                // Handle sign-in failure
                                 Log.d(TAG, "Sign-in failed.", task.getException());
                                 Toast.makeText(getContext(), "Sign-in failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
