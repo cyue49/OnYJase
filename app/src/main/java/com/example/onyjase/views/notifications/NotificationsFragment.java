@@ -29,6 +29,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 
 // Fragment for page displaying notifications
@@ -75,6 +76,7 @@ public class NotificationsFragment extends Fragment {
         setAllNotifications(viewModel.getUser().getValue().getUserID(), notificationsAdapter);
     }
 
+    // set all notifications for user
     private void setAllNotifications(String userID, NotificationsAdapter adapter) {
         // get all notifications where userID equals current user
         CollectionReference colRef = db.collection("notifications");
@@ -93,10 +95,22 @@ public class NotificationsFragment extends Fragment {
                             Notification notification = new Notification(notifID, fromUserID, userID, blogID, type, timestamp);
                             notifications.add(notification);
                         }
+                        sortNotificationsByDate(notifications);
                         adapter.reload();
                     } else {
                         Toast.makeText(requireContext(), "Error getting user notifications.", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    // sort notifications by date
+    private void sortNotificationsByDate(ArrayList<Notification> notifications) {
+        notifications.sort(new Comparator<Notification>() {
+            @Override
+            public int compare(Notification o1, Notification o2) {
+                if (o1.getTimestamp().equals(o2.getTimestamp())) return 0;
+                return o1.getTimestamp().compareTo(o2.getTimestamp()) * -1;
+            }
+        });
     }
 }
