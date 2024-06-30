@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.onyjase.R;
 import com.example.onyjase.adapters.NotificationsAdapter;
@@ -22,7 +23,10 @@ import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogFragment;
 import com.example.onyjase.views.posts.PostFragment;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,6 +77,26 @@ public class NotificationsFragment extends Fragment {
 
     private void setAllNotifications(String userID, NotificationsAdapter adapter) {
         // get all notifications where userID equals current user
-        // todo
+        CollectionReference colRef = db.collection("notifications");
+        Query query = colRef.whereEqualTo("toUserID", userID);
+        query.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String notifID = document.getString("notificationID");
+                            String fromUserID = document.getString("fromUserID");
+                            String blogID = document.getString("blogID");
+                            String type = document.getString("type");
+                            Date timestamp = document.getTimestamp("timestamp").toDate();
+
+
+                            Notification notification = new Notification(notifID, fromUserID, userID, blogID, type, timestamp);
+                            notifications.add(notification);
+                        }
+                        adapter.reload();
+                    } else {
+                        Toast.makeText(requireContext(), "Error getting user notifications.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

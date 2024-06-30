@@ -21,6 +21,15 @@ public class Notification {
         this.type = type;
     }
 
+    public Notification(String notificationID, String fromUserID, String toUserID, String blogID, String type, Date timestamp) {
+        this.notificationID = notificationID;
+        this.fromUserID = fromUserID;
+        this.toUserID = toUserID;
+        this.blogID = blogID;
+        this.type = type;
+        this.timestamp = timestamp;
+    }
+
     // getters
     public String getNotificationID() {
         return notificationID;
