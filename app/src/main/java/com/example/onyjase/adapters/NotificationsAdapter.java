@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.models.Notification;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
@@ -76,13 +78,39 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     }
 
     // set username for notification
+    @SuppressLint("SetTextI18n")
     private void setNotificationUsername(NotificationViewHolder holder, String userID) {
-        // todo
+        DocumentReference docRef = db.collection("users").document(userID);
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    holder.notifFrom.setText(document.getString("username"));
+                } else {
+                    holder.notifFrom.setText("User");
+                }
+            } else {
+                holder.notifFrom.setText("User");
+            }
+        });
     }
 
     // set blog title for notification
+    @SuppressLint("SetTextI18n")
     private void setNotificationBlogTitle(NotificationViewHolder holder, String blogID) {
-        // todo
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    holder.blogTitle.setText(document.getString("title"));
+                } else {
+                    holder.blogTitle.setText("Blog");
+                }
+            } else {
+                holder.blogTitle.setText("Blog");
+            };
+        });
     }
 
     // view holder for notifications

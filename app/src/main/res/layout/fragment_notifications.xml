@@ -16,6 +16,7 @@
         android:layout_height="55dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:layout_marginBottom="10dp"
         android:background="@color/subBlue">
 
         <TextView
@@ -48,7 +49,6 @@
                 android:layout_marginEnd="20dp"
                 android:src="@drawable/refresh_icon" />
         </LinearLayout>
-
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
