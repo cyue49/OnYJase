@@ -47,12 +47,23 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
         Notification notification = notifications.get(position);
         // set notification icon and text
-        if (notification.getType().equals("like")) {
-            Glide.with(context).load(R.drawable.blue_heart).into(holder.notifIcon);
-            holder.notifMessage.setText("liked your blog");
-        } else {
-            Glide.with(context).load(R.drawable.comment_icon).into(holder.notifIcon);
-            holder.notifMessage.setText("commented on your blog");
+        switch (notification.getType()) {
+            case "like":
+                Glide.with(context).load(R.drawable.blue_heart).into(holder.notifIcon);
+                holder.notifMessage.setText("liked your blog");
+                // set blog title
+                setNotificationBlogTitle(holder, notification.getBlogID());
+                break;
+            case "comment":
+                Glide.with(context).load(R.drawable.comment_icon).into(holder.notifIcon);
+                holder.notifMessage.setText("commented on your blog");
+                // set blog title
+                setNotificationBlogTitle(holder, notification.getBlogID());
+                break;
+            case "follow":
+                Glide.with(context).load(R.drawable.follow_icon).into(holder.notifIcon);
+                holder.notifMessage.setText("followed you.");
+                break;
         }
 
         // set date
@@ -61,9 +72,6 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
         // set username
         setNotificationUsername(holder, notification.getFromUserID());
-
-        // set blog
-        setNotificationBlogTitle(holder, notification.getBlogID());
     }
 
     @Override
