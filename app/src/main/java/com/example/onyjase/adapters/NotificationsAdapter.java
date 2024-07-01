@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,6 +27,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     ArrayList<Notification> notifications;
     Context context;
     FirebaseFirestore db;
+    OnNotificationClickListener notificationClickListener;
 
     public NotificationsAdapter(ArrayList<Notification> notifications, Context context, FirebaseFirestore db) {
         super();
@@ -72,6 +74,11 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
         // set username
         setNotificationUsername(holder, notification.getFromUserID());
+
+        // set notification click listener
+        holder.notificationItem.setOnClickListener(v -> {
+            notificationClickListener.onClickNotification(notification.getBlogID());
+        });
     }
 
     @Override
@@ -125,6 +132,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     class NotificationViewHolder extends RecyclerView.ViewHolder {
         ImageView notifIcon;
         TextView notifFrom, notifMessage, blogTitle, notifDate;
+        LinearLayout notificationItem;
 
         public NotificationViewHolder(View view) {
             super(view);
@@ -133,6 +141,17 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             notifMessage = view.findViewById(R.id.notifMessage);
             blogTitle = view.findViewById(R.id.blogTitle);
             notifDate = view.findViewById(R.id.notifDate);
+            notificationItem = view.findViewById(R.id.notificationItem);
         }
+    }
+
+    // on click listener for each notification
+    public interface OnNotificationClickListener {
+        void onClickNotification(String blogID);
+    }
+
+    // set listener
+    public void setOnNotificationClickListener(OnNotificationClickListener listener) {
+        this.notificationClickListener = listener;
     }
 }

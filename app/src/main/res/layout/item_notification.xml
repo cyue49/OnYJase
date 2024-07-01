@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     tools:ignore="HardcodedText"
+    android:id="@+id/notificationItem"
     android:paddingHorizontal="10dp" >
 
     <LinearLayout

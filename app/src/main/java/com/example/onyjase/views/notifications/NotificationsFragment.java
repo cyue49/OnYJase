@@ -70,6 +70,9 @@ public class NotificationsFragment extends Fragment {
         // setting adapter for notifications
         binding.notificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
         notificationsAdapter = new NotificationsAdapter(notifications, getContext(), db);
+        notificationsAdapter.setOnNotificationClickListener(blogID -> {
+            Toast.makeText(requireContext(), "Moving to blog" + blogID, Toast.LENGTH_SHORT).show();
+        });
         binding.notificationsList.setAdapter(notificationsAdapter);
 
         // set all notifications for this user
