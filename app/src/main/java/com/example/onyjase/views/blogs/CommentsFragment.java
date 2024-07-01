@@ -24,6 +24,7 @@ import com.example.onyjase.adapters.CommentAdapter;
 import com.example.onyjase.adapters.StickerAdapter;
 import com.example.onyjase.databinding.FragmentCommentsBinding;
 import com.example.onyjase.models.Comment;
+import com.example.onyjase.models.Notification;
 import com.example.onyjase.models.stickers.Sticker;
 import com.example.onyjase.models.stickers.Stickers;
 import com.example.onyjase.utils.StickersService;
@@ -253,8 +254,33 @@ public class CommentsFragment extends Fragment {
                     int count = Integer.parseInt(binding.commentsCount.getText().toString());
                     binding.commentsCount.setText(String.valueOf(count+1));
                     clearInputs();
+
+                    // save comment notification to db
+                    addCommentNotification(blogID);
                 })
                 .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error posting new comment.", Toast.LENGTH_SHORT).show());
+    }
+
+    // save comment notification to database
+    private void addCommentNotification(String blogID) {
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+        // get current blog
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    String notificationID = UUID.randomUUID().toString().replace("-", "");
+                    String fromUserID = viewModel.getUser().getValue().getUserID();
+                    String toUserID = document.getString("userID");
+
+                    // create new notification
+                    Notification notification = new Notification(notificationID, fromUserID, toUserID, blogID, "comment");
+
+                    // save new notification to db
+                    db.collection("notifications").document(notificationID).set(notification);
+                }
+            }
+        });
     }
 
     // stickers api call

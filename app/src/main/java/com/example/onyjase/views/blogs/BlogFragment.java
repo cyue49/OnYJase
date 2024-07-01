@@ -240,6 +240,7 @@ public class BlogFragment extends Fragment {
                             }
                         });
 
+                        // save like notification to db
                         addLikeNotification(blogID);
                     }
                 }
@@ -283,6 +284,7 @@ public class BlogFragment extends Fragment {
         });
     }
 
+    // save like notification to database
     private void addLikeNotification(String blogID){
         DocumentReference docRef = db.collection("blogs").document(blogID);
         // get current blog
