@@ -71,7 +71,10 @@ public class NotificationsFragment extends Fragment {
         binding.notificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
         notificationsAdapter = new NotificationsAdapter(notifications, getContext(), db);
         notificationsAdapter.setOnNotificationClickListener(blogID -> {
-            Toast.makeText(requireContext(), "Moving to blog" + blogID, Toast.LENGTH_SHORT).show();
+            if (!blogID.isEmpty()) {
+                viewModel.setCurrentBlogID(blogID);
+                FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+            }
         });
         binding.notificationsList.setAdapter(notificationsAdapter);
 
@@ -80,7 +83,9 @@ public class NotificationsFragment extends Fragment {
 
         // =============================================== Buttons Listeners ===============================================
         binding.clearBtn.setOnClickListener(v -> {
-            // todo
+            notifications.clear();
+            notificationsAdapter.reload();
+            // todo: update in db
         });
 
         binding.refreshBtn.setOnClickListener(v -> {
