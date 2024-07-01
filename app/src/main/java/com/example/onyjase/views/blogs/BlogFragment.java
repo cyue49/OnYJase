@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentBlogBinding;
 import com.example.onyjase.models.Blog;
+import com.example.onyjase.models.Notification;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.firebase.firestore.CollectionReference;
@@ -33,6 +34,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.UUID;
 
 // Fragment for a single blog
 public class BlogFragment extends Fragment {
@@ -237,6 +239,8 @@ public class BlogFragment extends Fragment {
                                 Toast.makeText(requireContext(), "Error updating favorites.", Toast.LENGTH_SHORT).show();
                             }
                         });
+
+                        addLikeNotification(blogID);
                     }
                 }
             }
@@ -275,6 +279,27 @@ public class BlogFragment extends Fragment {
                 }
             } else {
                 Toast.makeText(requireContext(), "Error getting current likes count.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void addLikeNotification(String blogID){
+        DocumentReference docRef = db.collection("blogs").document(blogID);
+        // get current blog
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    String notificationID = UUID.randomUUID().toString().replace("-", "");
+                    String fromUserID = viewModel.getUser().getValue().getUserID();
+                    String toUserID = document.getString("userID");
+
+                    // create new notification
+                    Notification notification = new Notification(notificationID, fromUserID, toUserID, blogID, "like");
+
+                    // save new notification to db
+                    db.collection("notifications").document(notificationID).set(notification);
+                }
             }
         });
     }
