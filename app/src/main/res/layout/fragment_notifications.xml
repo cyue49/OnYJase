@@ -49,6 +49,23 @@
                 android:layout_marginEnd="20dp"
                 android:src="@drawable/refresh_icon" />
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/clearBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" >
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:contentDescription="delete button"
+                android:layout_marginEnd="20dp"
+                android:src="@drawable/delete_icon" />
+        </LinearLayout>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

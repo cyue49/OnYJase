@@ -74,8 +74,18 @@ public class NotificationsFragment extends Fragment {
 
         // set all notifications for this user
         setAllNotifications(viewModel.getUser().getValue().getUserID(), notificationsAdapter);
+
+        // =============================================== Buttons Listeners ===============================================
+        binding.clearBtn.setOnClickListener(v -> {
+            // todo
+        });
+
+        binding.refreshBtn.setOnClickListener(v -> {
+            FragmentTransactionHelper.loadFragment(requireContext(), new NotificationsFragment());
+        });
     }
 
+    // =============================================== Functions ===============================================
     // set all notifications for user
     private void setAllNotifications(String userID, NotificationsAdapter adapter) {
         // get all notifications where userID equals current user
