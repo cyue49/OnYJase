@@ -297,7 +297,7 @@ public class BlogFragment extends Fragment {
                     String toUserID = document.getString("userID");
 
                     // create new notification
-                    Notification notification = new Notification(notificationID, fromUserID, toUserID, blogID, "like", true);
+                    Notification notification = new Notification(notificationID, fromUserID, toUserID, blogID, "like", true, true);
 
                     // save new notification to db
                     db.collection("notifications").document(notificationID).set(notification);

@@ -274,7 +274,7 @@ public class CommentsFragment extends Fragment {
                     String toUserID = document.getString("userID");
 
                     // create new notification
-                    Notification notification = new Notification(notificationID, fromUserID, toUserID, blogID, "comment", true);
+                    Notification notification = new Notification(notificationID, fromUserID, toUserID, blogID, "comment", true, true);
 
                     // save new notification to db
                     db.collection("notifications").document(notificationID).set(notification);

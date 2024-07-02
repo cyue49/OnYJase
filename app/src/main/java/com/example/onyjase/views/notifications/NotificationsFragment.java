@@ -71,59 +71,13 @@ public class NotificationsFragment extends Fragment {
         binding.notificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
         newNotificationsAdapter = new NotificationsAdapter(newNotifications, getContext(), db);
         // on click listener for each notification
-        newNotificationsAdapter.setOnNotificationClickListener(blogID -> {
-            // if current notification is a blog related notification
-            if (!blogID.isEmpty()) {
-                // check if this blog id still exists in db
-                db.collection("blogs").document(blogID)
-                        .get().addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if (document.exists()) {
-                                    // if blog id exists, navigates to corresponding blog page
-                                    viewModel.setCurrentBlogID(blogID);
-                                    FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
-                                } else {
-                                    // show confirmation dialog that this blog no longer exists
-                                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
-                                    LayoutInflater inflater = LayoutInflater.from(requireContext());
-                                    dialogBuilder.setMessage("This blog doesn't exist. It might have been deleted by its owner")
-                                            .setNegativeButton("Ok", ((dialog, which) -> dialog.dismiss()));
-                                    dialogBuilder.create().show();
-                                }
-                            }
-                        });
-            }
-        });
+        newNotificationsAdapter.setOnNotificationClickListener(this::notificationOnClickAction);
         binding.notificationsList.setAdapter(newNotificationsAdapter);
 
         // setting adapter for old notifications
         binding.oldNotificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
         oldNotificationsAdapter = new NotificationsAdapter(oldNotifications, getContext(), db);
-        oldNotificationsAdapter.setOnNotificationClickListener(blogID -> {
-            // if current notification is a blog related notification
-            if (!blogID.isEmpty()) {
-                // check if this blog id still exists in db
-                db.collection("blogs").document(blogID)
-                        .get().addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if (document.exists()) {
-                                    // if blog id exists, navigates to corresponding blog page
-                                    viewModel.setCurrentBlogID(blogID);
-                                    FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
-                                } else {
-                                    // show confirmation dialog that this blog no longer exists
-                                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
-                                    LayoutInflater inflater = LayoutInflater.from(requireContext());
-                                    dialogBuilder.setMessage("This blog doesn't exist. It might have been deleted by its owner")
-                                            .setNegativeButton("Ok", ((dialog, which) -> dialog.dismiss()));
-                                    dialogBuilder.create().show();
-                                }
-                            }
-                        });
-            }
-        });
+        oldNotificationsAdapter.setOnNotificationClickListener(this::notificationOnClickAction);
         binding.oldNotificationsList.setAdapter(oldNotificationsAdapter);
 
         // set all notifications for this user
@@ -152,10 +106,10 @@ public class NotificationsFragment extends Fragment {
 
     // =============================================== Functions ===============================================
     // set all notifications for user
-    private void setAllNotifications(String userID, NotificationsAdapter adapter, boolean isNew) {
+    private void setAllNotifications(String userID, NotificationsAdapter adapter, boolean isNewNotif) {
         // get all notifications where userID equals current user
         CollectionReference colRef = db.collection("notifications");
-        Query query = isNew ? colRef.whereEqualTo("toUserID", userID).whereEqualTo("show", true) : colRef.whereEqualTo("toUserID", userID).whereEqualTo("show", true);
+        Query query = isNewNotif ? colRef.whereEqualTo("toUserID", userID).whereEqualTo("show", true).whereEqualTo("newNotif", true) : colRef.whereEqualTo("toUserID", userID).whereEqualTo("show", true).whereEqualTo("newNotif", false);
         query.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()){
@@ -165,11 +119,12 @@ public class NotificationsFragment extends Fragment {
                             String blogID = document.getString("blogID");
                             String type = document.getString("type");
                             boolean show = document.getBoolean("show");
+                            boolean isNew = document.getBoolean("newNotif");
                             Date timestamp = document.getTimestamp("timestamp").toDate();
 
 
-                            Notification notification = new Notification(notifID, fromUserID, userID, blogID, type, show, timestamp);
-                            if (isNew) {
+                            Notification notification = new Notification(notifID, fromUserID, userID, blogID, type, show, isNew, timestamp);
+                            if (isNewNotif) {
                                 newNotifications.add(notification);
                             } else {
                                 oldNotifications.add(notification);
@@ -192,5 +147,31 @@ public class NotificationsFragment extends Fragment {
                 return o1.getTimestamp().compareTo(o2.getTimestamp()) * -1;
             }
         });
+    }
+
+    // on click action of a notification
+    private void notificationOnClickAction(String blogID) {
+        // if current notification is a blog related notification
+        if (!blogID.isEmpty()) {
+            // check if this blog id still exists in db
+            db.collection("blogs").document(blogID)
+                    .get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                // if blog id exists, navigates to corresponding blog page
+                                viewModel.setCurrentBlogID(blogID);
+                                FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+                            } else {
+                                // show confirmation dialog that this blog no longer exists
+                                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+                                LayoutInflater inflater = LayoutInflater.from(requireContext());
+                                dialogBuilder.setMessage("This blog doesn't exist. It might have been deleted by its owner")
+                                        .setNegativeButton("Ok", ((dialog, which) -> dialog.dismiss()));
+                                dialogBuilder.create().show();
+                            }
+                        }
+                    });
+        }
     }
 }
