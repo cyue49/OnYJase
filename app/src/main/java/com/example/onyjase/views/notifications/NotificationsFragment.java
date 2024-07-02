@@ -5,8 +5,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -15,15 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.onyjase.R;
 import com.example.onyjase.adapters.NotificationsAdapter;
 import com.example.onyjase.databinding.FragmentNotificationsBinding;
-import com.example.onyjase.models.Blog;
 import com.example.onyjase.models.Notification;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogFragment;
-import com.example.onyjase.views.posts.PostFragment;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -45,8 +40,10 @@ public class NotificationsFragment extends Fragment {
     FirebaseFirestore db;
 
     // recycle view adapter & list
-    NotificationsAdapter notificationsAdapter;
-    ArrayList<Notification> notifications;
+    NotificationsAdapter newNotificationsAdapter;
+    ArrayList<Notification> newNotifications;
+    NotificationsAdapter oldNotificationsAdapter;
+    ArrayList<Notification> oldNotifications;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,13 +64,14 @@ public class NotificationsFragment extends Fragment {
         // initializing variables
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
         db = FirebaseFirestore.getInstance();
-        notifications = new ArrayList<>();
+        newNotifications = new ArrayList<>();
+        oldNotifications = new ArrayList<>();
 
-        // setting adapter for notifications
+        // setting adapter for new notifications
         binding.notificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
-        notificationsAdapter = new NotificationsAdapter(notifications, getContext(), db);
+        newNotificationsAdapter = new NotificationsAdapter(newNotifications, getContext(), db);
         // on click listener for each notification
-        notificationsAdapter.setOnNotificationClickListener(blogID -> {
+        newNotificationsAdapter.setOnNotificationClickListener(blogID -> {
             // if current notification is a blog related notification
             if (!blogID.isEmpty()) {
                 // check if this blog id still exists in db
@@ -97,15 +95,45 @@ public class NotificationsFragment extends Fragment {
                         });
             }
         });
-        binding.notificationsList.setAdapter(notificationsAdapter);
+        binding.notificationsList.setAdapter(newNotificationsAdapter);
+
+        // setting adapter for old notifications
+        binding.oldNotificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
+        oldNotificationsAdapter = new NotificationsAdapter(oldNotifications, getContext(), db);
+        oldNotificationsAdapter.setOnNotificationClickListener(blogID -> {
+            // if current notification is a blog related notification
+            if (!blogID.isEmpty()) {
+                // check if this blog id still exists in db
+                db.collection("blogs").document(blogID)
+                        .get().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    // if blog id exists, navigates to corresponding blog page
+                                    viewModel.setCurrentBlogID(blogID);
+                                    FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+                                } else {
+                                    // show confirmation dialog that this blog no longer exists
+                                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+                                    LayoutInflater inflater = LayoutInflater.from(requireContext());
+                                    dialogBuilder.setMessage("This blog doesn't exist. It might have been deleted by its owner")
+                                            .setNegativeButton("Ok", ((dialog, which) -> dialog.dismiss()));
+                                    dialogBuilder.create().show();
+                                }
+                            }
+                        });
+            }
+        });
+        binding.oldNotificationsList.setAdapter(oldNotificationsAdapter);
 
         // set all notifications for this user
-        setAllNotifications(viewModel.getUser().getValue().getUserID(), notificationsAdapter);
+        setAllNotifications(viewModel.getUser().getValue().getUserID(), newNotificationsAdapter, true);
+        setAllNotifications(viewModel.getUser().getValue().getUserID(), oldNotificationsAdapter, false);
 
         // =============================================== Buttons Listeners ===============================================
         binding.clearBtn.setOnClickListener(v -> {
             // set all current notifications to not show
-            for (Notification notification : notifications) {
+            for (Notification notification : newNotifications) {
                 notification.setShow(false);
                 String notifID = notification.getNotificationID();
                 db.collection("notifications").document(notifID)
@@ -113,8 +141,8 @@ public class NotificationsFragment extends Fragment {
             }
 
             // clear list for adapter
-            notifications.clear();
-            notificationsAdapter.reload();
+            newNotifications.clear();
+            newNotificationsAdapter.reload();
         });
 
         binding.refreshBtn.setOnClickListener(v -> {
@@ -124,10 +152,10 @@ public class NotificationsFragment extends Fragment {
 
     // =============================================== Functions ===============================================
     // set all notifications for user
-    private void setAllNotifications(String userID, NotificationsAdapter adapter) {
+    private void setAllNotifications(String userID, NotificationsAdapter adapter, boolean isNew) {
         // get all notifications where userID equals current user
         CollectionReference colRef = db.collection("notifications");
-        Query query = colRef.whereEqualTo("toUserID", userID).whereEqualTo("show", true);
+        Query query = isNew ? colRef.whereEqualTo("toUserID", userID).whereEqualTo("show", true) : colRef.whereEqualTo("toUserID", userID).whereEqualTo("show", true);
         query.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()){
@@ -141,9 +169,13 @@ public class NotificationsFragment extends Fragment {
 
 
                             Notification notification = new Notification(notifID, fromUserID, userID, blogID, type, show, timestamp);
-                            notifications.add(notification);
+                            if (isNew) {
+                                newNotifications.add(notification);
+                            } else {
+                                oldNotifications.add(notification);
+                            }
                         }
-                        sortNotificationsByDate(notifications);
+                        sortNotificationsByDate(newNotifications);
                         adapter.reload();
                     } else {
                         Toast.makeText(requireContext(), "Error getting user notifications.", Toast.LENGTH_SHORT).show();
