@@ -10,23 +10,26 @@ public class Notification {
     private String toUserID;
     private String blogID;
     private String type; // like or comment
+    private boolean show; // show this notification to user or not
     private @ServerTimestamp Date timestamp;
 
     // constructor
-    public Notification(String notificationID, String fromUserID, String toUserID, String blogID, String type) {
+    public Notification(String notificationID, String fromUserID, String toUserID, String blogID, String type, boolean show) {
         this.notificationID = notificationID;
         this.fromUserID = fromUserID;
         this.toUserID = toUserID;
         this.blogID = blogID;
         this.type = type;
+        this.show = show;
     }
 
-    public Notification(String notificationID, String fromUserID, String toUserID, String blogID, String type, Date timestamp) {
+    public Notification(String notificationID, String fromUserID, String toUserID, String blogID, String type, boolean show, Date timestamp) {
         this.notificationID = notificationID;
         this.fromUserID = fromUserID;
         this.toUserID = toUserID;
         this.blogID = blogID;
         this.type = type;
+        this.show = show;
         this.timestamp = timestamp;
     }
 
@@ -55,6 +58,10 @@ public class Notification {
         return timestamp;
     }
 
+    public boolean isShow() {
+        return show;
+    }
+
     // setters
     public void setNotificationID(String notificationID) {
         this.notificationID = notificationID;
@@ -78,5 +85,9 @@ public class Notification {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public void setShow(boolean show) {
+        this.show = show;
     }
 }

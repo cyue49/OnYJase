@@ -103,6 +103,9 @@ public class NotificationsFragment extends Fragment {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()){
                         for (QueryDocumentSnapshot document : task.getResult()) {
+                            boolean show = document.getBoolean("show");
+                            if (!show) continue; // skip this notification if not show
+
                             String notifID = document.getString("notificationID");
                             String fromUserID = document.getString("fromUserID");
                             String blogID = document.getString("blogID");
@@ -110,7 +113,7 @@ public class NotificationsFragment extends Fragment {
                             Date timestamp = document.getTimestamp("timestamp").toDate();
 
 
-                            Notification notification = new Notification(notifID, fromUserID, userID, blogID, type, timestamp);
+                            Notification notification = new Notification(notifID, fromUserID, userID, blogID, type, show, timestamp);
                             notifications.add(notification);
                         }
                         sortNotificationsByDate(notifications);
