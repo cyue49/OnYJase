@@ -85,8 +85,11 @@
 
             <!-- new notifications -->
             <TextView
+                android:id="@+id/newNotifsDivider"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
                 android:textColor="@color/black"
                 android:background="@color/grayBtn"
                 android:paddingHorizontal="10dp"
@@ -95,14 +98,17 @@
                 android:text="New"/>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/notificationsList"
+                android:id="@+id/newNotificationsList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
             <!-- old notifications -->
             <TextView
+                android:id="@+id/oldNotifsDivider"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
                 android:textColor="@color/black"
                 android:background="@color/grayBtn"
                 android:paddingHorizontal="10dp"

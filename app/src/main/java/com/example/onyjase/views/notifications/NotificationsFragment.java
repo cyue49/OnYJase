@@ -69,11 +69,11 @@ public class NotificationsFragment extends Fragment {
         oldNotifications = new ArrayList<>();
 
         // setting adapter for new notifications
-        binding.notificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.newNotificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
         newNotificationsAdapter = new NotificationsAdapter(newNotifications, getContext(), db);
         // on click listener for each notification
         newNotificationsAdapter.setOnNotificationClickListener(this::notificationOnClickAction);
-        binding.notificationsList.setAdapter(newNotificationsAdapter);
+        binding.newNotificationsList.setAdapter(newNotificationsAdapter);
 
         // setting adapter for old notifications
         binding.oldNotificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -86,6 +86,7 @@ public class NotificationsFragment extends Fragment {
         setAllNotifications(viewModel.getUser().getValue().getUserID(), oldNotificationsAdapter, false);
 
         // =============================================== Buttons Listeners ===============================================
+        // clear notifications button
         binding.clearBtn.setOnClickListener(v -> {
             // set all current notifications to not show
             for (Notification notification : newNotifications) {
@@ -100,8 +101,27 @@ public class NotificationsFragment extends Fragment {
             newNotificationsAdapter.reload();
         });
 
+        // refresh notifications button
         binding.refreshBtn.setOnClickListener(v -> {
             FragmentTransactionHelper.loadFragment(requireContext(), new NotificationsFragment());
+        });
+
+        // tapping on new notifications divider (show/collapse new notifications)
+        binding.newNotifsDivider.setOnClickListener(v -> {
+            if (binding.newNotificationsList.getVisibility() == View.VISIBLE) {
+                binding.newNotificationsList.setVisibility(View.GONE);
+            } else {
+                binding.newNotificationsList.setVisibility(View.VISIBLE);
+            }
+        });
+
+        // tapping on old notifications divider (show/collapse old notifications)
+        binding.oldNotifsDivider.setOnClickListener(v -> {
+            if (binding.oldNotificationsList.getVisibility() == View.VISIBLE) {
+                binding.oldNotificationsList.setVisibility(View.GONE);
+            } else {
+                binding.oldNotificationsList.setVisibility(View.VISIBLE);
+            }
         });
     }
 
