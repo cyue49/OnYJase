@@ -24,6 +24,7 @@ import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogFragment;
 import com.example.onyjase.views.posts.PostFragment;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -70,10 +71,25 @@ public class NotificationsFragment extends Fragment {
         // setting adapter for notifications
         binding.notificationsList.setLayoutManager(new LinearLayoutManager(getContext()));
         notificationsAdapter = new NotificationsAdapter(notifications, getContext(), db);
+        // on click listener for each notification
         notificationsAdapter.setOnNotificationClickListener(blogID -> {
+            // if current notification is a blog related notification
             if (!blogID.isEmpty()) {
-                viewModel.setCurrentBlogID(blogID);
-                FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+                // check if this blog id still exists in db
+                db.collection("blogs").document(blogID)
+                        .get().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    // if blog id exists, navigates to corresponding blog page
+                                    viewModel.setCurrentBlogID(blogID);
+                                    FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+                                }
+                            } else {
+                                // show confirmation dialog that this blog no longer exists
+                                // todo
+                            }
+                        });
             }
         });
         binding.notificationsList.setAdapter(notificationsAdapter);
