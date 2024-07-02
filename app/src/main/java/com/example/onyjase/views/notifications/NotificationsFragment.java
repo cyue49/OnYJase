@@ -1,5 +1,6 @@
 package com.example.onyjase.views.notifications;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -84,10 +85,14 @@ public class NotificationsFragment extends Fragment {
                                     // if blog id exists, navigates to corresponding blog page
                                     viewModel.setCurrentBlogID(blogID);
                                     FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+                                } else {
+                                    // show confirmation dialog that this blog no longer exists
+                                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+                                    LayoutInflater inflater = LayoutInflater.from(requireContext());
+                                    dialogBuilder.setMessage("This blog doesn't exist. It might have been deleted by its owner")
+                                            .setNegativeButton("Ok", ((dialog, which) -> dialog.dismiss()));
+                                    dialogBuilder.create().show();
                                 }
-                            } else {
-                                // show confirmation dialog that this blog no longer exists
-                                // todo
                             }
                         });
             }
@@ -122,18 +127,16 @@ public class NotificationsFragment extends Fragment {
     private void setAllNotifications(String userID, NotificationsAdapter adapter) {
         // get all notifications where userID equals current user
         CollectionReference colRef = db.collection("notifications");
-        Query query = colRef.whereEqualTo("toUserID", userID);
+        Query query = colRef.whereEqualTo("toUserID", userID).whereEqualTo("show", true);
         query.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()){
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            boolean show = document.getBoolean("show");
-                            if (!show) continue; // skip this notification if not show
-
                             String notifID = document.getString("notificationID");
                             String fromUserID = document.getString("fromUserID");
                             String blogID = document.getString("blogID");
                             String type = document.getString("type");
+                            boolean show = document.getBoolean("show");
                             Date timestamp = document.getTimestamp("timestamp").toDate();
 
 
