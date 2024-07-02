@@ -28,6 +28,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Objects;
 
 // Fragment for page displaying notifications
 public class NotificationsFragment extends Fragment {
@@ -118,9 +119,9 @@ public class NotificationsFragment extends Fragment {
                             String fromUserID = document.getString("fromUserID");
                             String blogID = document.getString("blogID");
                             String type = document.getString("type");
-                            boolean show = document.getBoolean("show");
-                            boolean isNew = document.getBoolean("newNotif");
-                            Date timestamp = document.getTimestamp("timestamp").toDate();
+                            boolean show = Boolean.TRUE.equals(document.getBoolean("show"));
+                            boolean isNew = Boolean.TRUE.equals(document.getBoolean("newNotif"));
+                            Date timestamp = Objects.requireNonNull(document.getTimestamp("timestamp")).toDate();
 
 
                             Notification notification = new Notification(notifID, fromUserID, userID, blogID, type, show, isNew, timestamp);
@@ -130,8 +131,13 @@ public class NotificationsFragment extends Fragment {
                                 oldNotifications.add(notification);
                             }
                         }
-                        sortNotificationsByDate(newNotifications);
+                        if (isNewNotif) {
+                            sortNotificationsByDate(newNotifications);
+                        } else {
+                            sortNotificationsByDate(oldNotifications);
+                        }
                         adapter.reload();
+//                        updateNotificationsToOld();
                     } else {
                         Toast.makeText(requireContext(), "Error getting user notifications.", Toast.LENGTH_SHORT).show();
                     }
@@ -173,5 +179,21 @@ public class NotificationsFragment extends Fragment {
                         }
                     });
         }
+    }
+
+    // set new notifications to old in database when user opens notification tab
+    private void updateNotificationsToOld() {
+        for (Notification notification : newNotifications) {
+            notification.setNewNotif(false);
+            String notifID = notification.getNotificationID();
+            db.collection("notifications").document(notifID).set(notification);
+        }
+    }
+
+    // set all new notifications to old when leaving notif tab
+    @Override
+    public void onStop() {
+        super.onStop();
+        updateNotificationsToOld();
     }
 }
