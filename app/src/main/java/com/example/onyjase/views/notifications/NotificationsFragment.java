@@ -83,9 +83,17 @@ public class NotificationsFragment extends Fragment {
 
         // =============================================== Buttons Listeners ===============================================
         binding.clearBtn.setOnClickListener(v -> {
+            // set all current notifications to not show
+            for (Notification notification : notifications) {
+                notification.setShow(false);
+                String notifID = notification.getNotificationID();
+                db.collection("notifications").document(notifID)
+                        .set(notification);
+            }
+
+            // clear list for adapter
             notifications.clear();
             notificationsAdapter.reload();
-            // todo: update in db
         });
 
         binding.refreshBtn.setOnClickListener(v -> {
