@@ -13,9 +13,9 @@
 
         <ImageView
             android:id="@+id/logoImageView"
-            android:layout_width="197dp"
-            android:layout_height="206dp"
-            android:layout_marginTop="1dp"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="10dp"
             android:contentDescription="@string/logo"
             android:src="@drawable/logo"
             app:layout_constraintDimensionRatio="1"
@@ -30,25 +30,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
-            android:text="Create an account"
+            android:text="Sign Up"
+            android:textStyle="bold"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/logoImageView"
-            tools:ignore="MissingConstraints" />
-
-        <TextView
-            android:id="@+id/enterEmailTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Enter your email to sign up for this app"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/createAccountTextView" />
+            app:layout_constraintTop_toBottomOf="@+id/logoImageView" />
 
         <EditText
             android:id="@+id/emailEditText"
@@ -66,7 +54,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/enterEmailTextView" />
+            app:layout_constraintTop_toBottomOf="@id/createAccountTextView" />
 
         <EditText
             android:id="@+id/usernameEditText"
@@ -123,9 +111,8 @@
             android:id="@+id/signUpBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
+            android:layout_marginHorizontal="32dp"
             android:layout_marginTop="40dp"
-            android:layout_marginEnd="32dp"
             android:backgroundTint="@color/white"
 
             android:text="Sign up"
@@ -136,10 +123,11 @@
 
         <Button
             android:id="@+id/toSignInBtn"
-            android:layout_width="347dp"
-            android:layout_height="40dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="Sign In"
+            android:layout_marginHorizontal="32dp"
+            android:text="Sign In Instead"
             android:textColorLink="#0B0A0A"
             android:backgroundTint="@color/white"
             android:textColor="@android:color/black"
@@ -149,11 +137,11 @@
 
         <TextView
             android:id="@+id/termsTextView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
+            android:layout_marginHorizontal="32dp"
             android:layout_marginTop="30dp"
-            android:layout_marginEnd="32dp"
+            android:gravity="center"
             android:text="By clicking continue, you agree to our Terms of Service and Privacy Policy"
             android:textColor="@android:color/white"
             android:textSize="12sp"

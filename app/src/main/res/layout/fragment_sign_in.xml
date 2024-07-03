@@ -14,9 +14,9 @@ xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
         android:id="@+id/logoImageView"
-        android:layout_width="239dp"
-        android:layout_height="264dp"
-        android:layout_marginTop="28dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="10dp"
         android:contentDescription="@string/logo"
         android:src="@drawable/logo"
         app:layout_constraintDimensionRatio="1"
@@ -27,33 +27,33 @@ xmlns:tools="http://schemas.android.com/tools">
         app:layout_constraintWidth_default="wrap" />
 
     <TextView
-        android:id="@+id/createAccountTextView"
+        android:id="@+id/signInTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
+        android:layout_marginTop="1dp"
+        android:text="Sign In"
+        android:textStyle="bold"
         android:textColor="@android:color/white"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logoImageView"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintTop_toBottomOf="@+id/logoImageView" />
 
     <EditText
         android:id="@+id/emailEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="12dp"
         android:backgroundTint="@android:color/white"
         android:hint="Email"
         android:inputType="textEmailAddress"
-
         android:textColor="@color/white"
         android:textColorHint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/createAccountTextView" />
+        app:layout_constraintTop_toBottomOf="@id/signInTextView" />
 
     <EditText
         android:id="@+id/passwordEditText"
@@ -74,11 +74,10 @@ xmlns:tools="http://schemas.android.com/tools">
 
     <Button
         android:id="@+id/button"
-        android:layout_width="293dp"
-        android:layout_height="41dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="70dp"
-        android:layout_marginEnd="32dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="40dp"
         android:backgroundTint="@color/white"
 
         android:text="Sign In"
@@ -89,11 +88,12 @@ xmlns:tools="http://schemas.android.com/tools">
 
     <Button
         android:id="@+id/button2"
-        android:layout_width="295dp"
-        android:layout_height="41dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="32dp"
         android:backgroundTint="@color/white"
-        android:text="Sign Up"
+        android:text="Sign Up Instead"
         android:textColor="@android:color/black"
         android:textColorLink="#0B0A0A"
         app:layout_constraintEnd_toEndOf="parent"
@@ -103,13 +103,13 @@ xmlns:tools="http://schemas.android.com/tools">
 
     <TextView
         android:id="@+id/termsTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="65dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="30dp"
         android:text="By clicking continue, you agree to our Terms of Service and Privacy Policy"
         android:textColor="@android:color/white"
+        android:gravity="center"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
