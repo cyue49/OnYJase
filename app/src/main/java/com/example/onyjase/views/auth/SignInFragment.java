@@ -2,6 +2,7 @@ package com.example.onyjase.views.auth;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -31,6 +32,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SignInFragment extends Fragment {
     FragmentSignInBinding binding;
@@ -77,7 +79,6 @@ public class SignInFragment extends Fragment {
 
         userSignInBtn = binding.button;
         toSignUpBtn = binding.button2;
-//        adminSignInBtn = binding.button3;
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         userSignInBtn.setOnClickListener(new View.OnClickListener() {
@@ -85,18 +86,9 @@ public class SignInFragment extends Fragment {
             public void onClick(View v) {
                 String email = binding.emailEditText.getText().toString();
                 String password = binding.passwordEditText.getText().toString();
-                signInUser(email, password, "user");
+                signInUser(email, password);
             }
         });
-
-//        adminSignInBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                String email = binding.emailEditText.getText().toString();
-//                String password = binding.passwordEditText.getText().toString();
-//                signInUser(email, password, "admin");
-//            }
-//        });
 
         toSignUpBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,7 +98,37 @@ public class SignInFragment extends Fragment {
         });
     }
 
-    private void signInUser(String email, String password, String expectedRole) {
+    // sign in directly if user already signed in
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            // set view model
+            String currentUserID = currentUser.getUid();
+            db.collection("users").document(currentUserID).get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                String role = document.getString("role");
+                                String email = document.getString("email");
+                                String username = document.getString("username");
+                                String imageURL = document.getString("imageURL");
+                                List<String> followings = (List<String>) document.get("followings");
+                                List<String> favorites = (List<String>) document.get("favorites");
+                                User user = new User(currentUserID, username, email, role, imageURL, followings, favorites);
+                                viewModel.setUser(user);
+
+                                // navigate to user screen
+                                navController.navigate(R.id.action_signInFragment_to_appFragment);
+                            }
+                        }
+                    });
+        }
+    }
+
+    private void signInUser(String email, String password) {
         if (email.isEmpty() || password.isEmpty()) {
             Log.d(TAG, "Email or password is empty.");
             return;
@@ -131,16 +153,13 @@ public class SignInFragment extends Fragment {
                                                 DocumentSnapshot document = task.getResult();
                                                 if (document.exists()) {
                                                     String role = document.getString("role");
-                                                    if (role != null && role.equals(expectedRole)) {
-                                                        User userModel = new User(firebaseUser.getUid(), "test", email, role, "", new ArrayList<>(), new ArrayList<>());
-                                                        viewModel.setUser(userModel);
-                                                        navController.navigate(R.id.action_signInFragment_to_appFragment); // Navigate to user screen
-                                                    } else {
-
-                                                        Log.d(TAG, "Role mismatch.");
-                                                        mAuth.signOut();
-                                                        Toast.makeText(getContext(), "Role mismatch. Please check your credentials.", Toast.LENGTH_SHORT).show();
-                                                    }
+                                                    String username = document.getString("username");
+                                                    String imageURL = document.getString("imageURL");
+                                                    List<String> followings = (List<String>) document.get("followings");
+                                                    List<String> favorites = (List<String>) document.get("favorites");
+                                                    User userModel = new User(firebaseUser.getUid(), username, email, role, imageURL, followings, favorites);
+                                                    viewModel.setUser(userModel);
+                                                    navController.navigate(R.id.action_signInFragment_to_appFragment); // Navigate to user screen
                                                 } else {
 
                                                     Log.d(TAG, "User document not found.");
