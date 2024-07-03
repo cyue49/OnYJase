@@ -9,16 +9,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentUserProfileBinding;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class UserProfileFragment extends Fragment {
     private FragmentUserProfileBinding binding;
     private AppViewModel viewModel;
+    private FirebaseAuth mAuth;
+    NavController navController;
 
     @Nullable
     @Override
@@ -32,6 +37,8 @@ public class UserProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
+        mAuth = FirebaseAuth.getInstance();
+        navController = Navigation.findNavController(view);
 
         // Set user details
         viewModel.getUser().observe(getViewLifecycleOwner(), user -> {
@@ -58,6 +65,13 @@ public class UserProfileFragment extends Fragment {
                 tab.setText("My Comments");
             }
         }).attach();
+
+        // click listener for logout button
+        binding.logoutButton.setOnClickListener(v -> {
+            mAuth.signOut();
+            viewModel.setUser(null);
+            navController.navigate(R.id.action_appFragment_to_signInFragment);
+        });
     }
 
     private static class ScreenSlidePagerAdapter extends FragmentStateAdapter {
