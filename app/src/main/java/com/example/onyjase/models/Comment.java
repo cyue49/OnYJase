@@ -12,6 +12,11 @@ public class Comment {
     private String stickerURL;
     private Date timestamp;
     // constructor
+
+    // No-argument constructor needed for Firestore
+    public Comment() {
+    }
+
     public Comment(String commentID, String userID, String blogID, String content, String stickerURL, Date timestamp) {
         this.commentID = commentID;
         this.userID = userID;
