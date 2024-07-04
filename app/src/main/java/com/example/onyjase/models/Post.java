@@ -22,6 +22,10 @@ public class Post {
         this.imageURL = imageURL;
     }
 
+    // No-argument constructor needed for Firestore
+    public Post() {
+    }
+
     // getters
     public String getPostID() {
         return postID;
