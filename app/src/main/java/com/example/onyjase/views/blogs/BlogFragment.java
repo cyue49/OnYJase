@@ -133,9 +133,15 @@ public class BlogFragment extends Fragment {
                         binding.editBtn.setVisibility(View.VISIBLE);
                         binding.deleteBtn.setVisibility(View.VISIBLE);
 
+                        // don't show follow button
+                        binding.followButton.setVisibility(View.INVISIBLE);
+
                         // set current blog in view model
                         List<String> likedBy = (List<String>) document.get("likedBy");
                         viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue(), likedBy));
+                    } else {
+                        // set follow button based on if following blog author
+                        setFollowIcon(document.getString("userID"));
                     }
 
                     // if user is admin, show delete button
@@ -200,14 +206,32 @@ public class BlogFragment extends Fragment {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                     List<String> userLikes = (List<String>) document.get("favorites");
-                    if (userLikes != null && userLikes.contains(blogID)) {
+                    if (userLikes != null && userLikes.contains(blogID)) { // user already liked this blog
                         binding.likeIcon.setImageResource(R.drawable.blue_heart);
-                    } else {
+                    } else { // user hasn't liked this blog
                         binding.likeIcon.setImageResource(R.drawable.gray_heart);
                     }
                 }
             } else {
                 Toast.makeText(requireContext(), "Error updating likes.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // set follow icon depending on if current user is following author of the blog
+    private void setFollowIcon(String blogUserID) {
+        String userID = viewModel.getUser().getValue().getUserID();
+        db.collection("users").document(userID).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    List<String> userFollowings = (List<String>) document.get("followings");
+                    if (userFollowings != null && userFollowings.contains(blogUserID)) { // user already following blog author
+                        binding.followButton.setImageResource(R.drawable.following_button);
+                    } else { // user not following blog author
+                        binding.followButton.setImageResource(R.drawable.follow_button);
+                    }
+                }
             }
         });
     }
