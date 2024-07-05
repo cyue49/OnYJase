@@ -116,6 +116,11 @@ public class BlogFragment extends Fragment {
             }).setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
             dialogBuilder.create().show();
         });
+
+        // Follow button listener
+        binding.followButton.setOnClickListener(v -> {
+            updateUserFollows(currentBlogID);
+        });
     }
 
     // =============================================== Functions ===============================================
@@ -306,6 +311,55 @@ public class BlogFragment extends Fragment {
                 Toast.makeText(requireContext(), "Error getting current likes count.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // update the user's followings list with the new follow/unfollow
+    private void updateUserFollows(String blogID) {
+        db.collection("blogs").document(blogID).get()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        // get author id of the blog
+                        String blogUserID = document.getString("userID");
+
+                        String currentUserId = viewModel.getUser().getValue().getUserID();
+                        DocumentReference docRef = db.collection("users").document(currentUserId);
+                        docRef.get().addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                DocumentSnapshot document1 = task1.getResult();
+                                if (document1.exists()) {
+                                    // get list of current user's followings
+                                    List<String> userFollowings = (List<String>) document1.get("followings");
+                                    if (userFollowings != null && userFollowings.contains(blogUserID)) { // if already following
+                                        // remove blog user id from followings
+                                        docRef.update("followings", FieldValue.arrayRemove(blogUserID)).addOnCompleteListener(task2 -> {
+                                            if (task2.isSuccessful()) {
+                                                // toggle follow button icon
+                                                binding.followButton.setImageResource(R.drawable.follow_button);
+                                            } else {
+                                                Toast.makeText(requireContext(), "Error updating followings.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    } else { // if not following
+                                        // add blog user id to followings
+                                        docRef.update("followings", FieldValue.arrayUnion(blogUserID)).addOnCompleteListener(task2 -> {
+                                            if (task2.isSuccessful()) {
+                                                // toggle follow button icon
+                                                binding.followButton.setImageResource(R.drawable.following_button);
+                                            } else {
+                                                Toast.makeText(requireContext(), "Error updating followings.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        });
+
+                        // todo: save follow notification to database
+                    }
+                }
+            });
     }
 
     // save like notification to database
