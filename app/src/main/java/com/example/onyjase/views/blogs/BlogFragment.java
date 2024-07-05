@@ -347,6 +347,9 @@ public class BlogFragment extends Fragment {
                                             if (task2.isSuccessful()) {
                                                 // toggle follow button icon
                                                 binding.followButton.setImageResource(R.drawable.following_button);
+
+                                                // save follow notification to database
+                                                addFollowNotification(blogUserID, currentUserId);
                                             } else {
                                                 Toast.makeText(requireContext(), "Error updating followings.", Toast.LENGTH_SHORT).show();
                                             }
@@ -355,8 +358,6 @@ public class BlogFragment extends Fragment {
                                 }
                             }
                         });
-
-                        // todo: save follow notification to database
                     }
                 }
             });
@@ -382,6 +383,17 @@ public class BlogFragment extends Fragment {
                 }
             }
         });
+    }
+
+    // save follow notification to database
+    private void addFollowNotification(String toUserID, String fromUserID){
+        String notificationID = UUID.randomUUID().toString().replace("-", "");
+
+        // create new notification
+        Notification notification = new Notification(notificationID, fromUserID, toUserID, "", "follow", true, true);
+
+        // save notification to db
+        db.collection("notifications").document(notificationID).set(notification);
     }
 
     // delete blog from db
