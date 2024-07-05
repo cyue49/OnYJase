@@ -116,6 +116,11 @@ public class BlogFragment extends Fragment {
             }).setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
             dialogBuilder.create().show();
         });
+
+        // Follow button listener
+        binding.followButton.setOnClickListener(v -> {
+            updateUserFollows(currentBlogID);
+        });
     }
 
     // =============================================== Functions ===============================================
@@ -133,9 +138,15 @@ public class BlogFragment extends Fragment {
                         binding.editBtn.setVisibility(View.VISIBLE);
                         binding.deleteBtn.setVisibility(View.VISIBLE);
 
+                        // don't show follow button
+                        binding.followButton.setVisibility(View.INVISIBLE);
+
                         // set current blog in view model
                         List<String> likedBy = (List<String>) document.get("likedBy");
                         viewModel.setCurrentBlog(new Blog(blogID, document.getString("userID"), document.getString("title"), document.getString("content"), document.getString("imageURL"), document.getDouble("likes").intValue(), likedBy));
+                    } else {
+                        // set follow button based on if following blog author
+                        setFollowIcon(document.getString("userID"));
                     }
 
                     // if user is admin, show delete button
@@ -200,14 +211,32 @@ public class BlogFragment extends Fragment {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                     List<String> userLikes = (List<String>) document.get("favorites");
-                    if (userLikes != null && userLikes.contains(blogID)) {
+                    if (userLikes != null && userLikes.contains(blogID)) { // user already liked this blog
                         binding.likeIcon.setImageResource(R.drawable.blue_heart);
-                    } else {
+                    } else { // user hasn't liked this blog
                         binding.likeIcon.setImageResource(R.drawable.gray_heart);
                     }
                 }
             } else {
                 Toast.makeText(requireContext(), "Error updating likes.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // set follow icon depending on if current user is following author of the blog
+    private void setFollowIcon(String blogUserID) {
+        String userID = viewModel.getUser().getValue().getUserID();
+        db.collection("users").document(userID).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    List<String> userFollowings = (List<String>) document.get("followings");
+                    if (userFollowings != null && userFollowings.contains(blogUserID)) { // user already following blog author
+                        binding.followButton.setImageResource(R.drawable.following_button);
+                    } else { // user not following blog author
+                        binding.followButton.setImageResource(R.drawable.follow_button);
+                    }
+                }
             }
         });
     }
@@ -284,6 +313,56 @@ public class BlogFragment extends Fragment {
         });
     }
 
+    // update the user's followings list with the new follow/unfollow
+    private void updateUserFollows(String blogID) {
+        db.collection("blogs").document(blogID).get()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        // get author id of the blog
+                        String blogUserID = document.getString("userID");
+
+                        String currentUserId = viewModel.getUser().getValue().getUserID();
+                        DocumentReference docRef = db.collection("users").document(currentUserId);
+                        docRef.get().addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                DocumentSnapshot document1 = task1.getResult();
+                                if (document1.exists()) {
+                                    // get list of current user's followings
+                                    List<String> userFollowings = (List<String>) document1.get("followings");
+                                    if (userFollowings != null && userFollowings.contains(blogUserID)) { // if already following
+                                        // remove blog user id from followings
+                                        docRef.update("followings", FieldValue.arrayRemove(blogUserID)).addOnCompleteListener(task2 -> {
+                                            if (task2.isSuccessful()) {
+                                                // toggle follow button icon
+                                                binding.followButton.setImageResource(R.drawable.follow_button);
+                                            } else {
+                                                Toast.makeText(requireContext(), "Error updating followings.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    } else { // if not following
+                                        // add blog user id to followings
+                                        docRef.update("followings", FieldValue.arrayUnion(blogUserID)).addOnCompleteListener(task2 -> {
+                                            if (task2.isSuccessful()) {
+                                                // toggle follow button icon
+                                                binding.followButton.setImageResource(R.drawable.following_button);
+
+                                                // save follow notification to database
+                                                addFollowNotification(blogUserID, currentUserId);
+                                            } else {
+                                                Toast.makeText(requireContext(), "Error updating followings.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+    }
+
     // save like notification to database
     private void addLikeNotification(String blogID){
         DocumentReference docRef = db.collection("blogs").document(blogID);
@@ -304,6 +383,17 @@ public class BlogFragment extends Fragment {
                 }
             }
         });
+    }
+
+    // save follow notification to database
+    private void addFollowNotification(String toUserID, String fromUserID){
+        String notificationID = UUID.randomUUID().toString().replace("-", "");
+
+        // create new notification
+        Notification notification = new Notification(notificationID, fromUserID, toUserID, "", "follow", true, true);
+
+        // save notification to db
+        db.collection("notifications").document(notificationID).set(notification);
     }
 
     // delete blog from db
