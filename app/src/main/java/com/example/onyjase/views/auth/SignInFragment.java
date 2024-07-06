@@ -2,6 +2,7 @@ package com.example.onyjase.views.auth;
 
 import static android.content.ContentValues.TAG;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -217,7 +218,11 @@ public class SignInFragment extends Fragment {
                             mAuth.sendPasswordResetEmail(email)
                                 .addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()) {
-                                        // todo: add pop up dialog that password reset email sent, check email to reset password.
+                                        // pop up dialog after sending password reset email
+                                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+                                        dialogBuilder.setMessage("Password reset email sent. Please check your email to reset your password.")
+                                                .setNegativeButton("Ok", ((dialog, which) -> dialog.dismiss()));
+                                        dialogBuilder.create().show();
                                     }
                                 });
                         }
