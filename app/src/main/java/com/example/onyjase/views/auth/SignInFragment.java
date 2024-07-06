@@ -27,8 +27,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class SignInFragment extends Fragment {
     FragmentSignInBinding binding;
     NavController navController;
 
-    Button userSignInBtn, adminSignInBtn, toSignUpBtn;
+    Button userSignInBtn, toSignUpBtn;
 
     AppViewModel viewModel;
 
@@ -81,6 +83,7 @@ public class SignInFragment extends Fragment {
         toSignUpBtn = binding.button2;
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
+        // sign in button
         userSignInBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,10 +93,21 @@ public class SignInFragment extends Fragment {
             }
         });
 
+        // to sign up button
         toSignUpBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 navController.navigate(R.id.action_signInFragment_to_signUpFragment);
+            }
+        });
+
+        // forgot password button
+        binding.forgotPassword.setOnClickListener(v -> {
+            String email = binding.emailEditText.getText().toString();
+            if (email.isEmpty()) {
+                Toast.makeText(getContext(), "Please enter your email.", Toast.LENGTH_SHORT).show();
+            } else {
+                sendPasswordResetEmail(email);
             }
         });
     }
@@ -187,5 +201,27 @@ public class SignInFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void sendPasswordResetEmail(String email) {
+        // check if user with this email exists
+        CollectionReference colRef = db.collection("users");
+        Query query = colRef.whereEqualTo("email", email);
+        query.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (task.getResult().isEmpty()) { // user with this email doesn't exist
+                            Toast.makeText(getContext(), "An account with this email does not exist.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // send password reset email
+                            mAuth.sendPasswordResetEmail(email)
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()) {
+                                        // todo: add pop up dialog that password reset email sent, check email to reset password.
+                                    }
+                                });
+                        }
+                    }
+                });
     }
 }
