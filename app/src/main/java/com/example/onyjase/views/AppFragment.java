@@ -25,6 +25,7 @@ import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentAppBinding;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.example.onyjase.views.admin.AdminProfileFragment;
 import com.example.onyjase.views.blogs.BlogsFeedFragment;
 import com.example.onyjase.views.blogs.NewBlogFragment;
 import com.example.onyjase.views.posts.NewPostFragment;
@@ -106,7 +107,11 @@ public class AppFragment extends Fragment {
                     break;
 
                 case R.id.profile:
-                    FragmentTransactionHelper.loadFragment(requireContext(), new UserProfileFragment());
+                    if (viewModel.getUser().getValue().getRole().equals("admin")){
+                        FragmentTransactionHelper.loadFragment(requireContext(), new AdminProfileFragment());
+                    } else {
+                        FragmentTransactionHelper.loadFragment(requireContext(), new UserProfileFragment());
+                    }
                     break;
             }
             return true;
