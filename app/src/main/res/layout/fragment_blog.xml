@@ -140,9 +140,22 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:text=""
+                    android:maxLines="1"
+                    android:maxEms="5"
+                    android:ellipsize="end"
                     android:textColor="@color/subBlue"
                     android:textSize="16sp"
                     android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/followButton"
+                    android:layout_width="90dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="10dp"
+                    android:contentDescription="follow button"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/follow_button" />
 
                 <View
                     android:layout_width = "0dp"
