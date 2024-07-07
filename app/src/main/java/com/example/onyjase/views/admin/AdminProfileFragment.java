@@ -93,9 +93,9 @@ public class AdminProfileFragment extends Fragment {
                 case 1:
                     return new AllBlogsFragment();
                 case 2:
-                    return new AllBlogsFragment(); // To be replaced
+                    return new AllPostsFragment();
                 case 3:
-                    return new AllBlogsFragment(); // To be replaced
+                    return new AllCommentsFragment();
                 default:
                     return new AllUsersFragment();
             }
