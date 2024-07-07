@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/admin_profile_page"
+    tools:context=".views.admin.AdminProfileFragment">
+
+    <!-- Top section with admin info and logout button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@color/subBlue">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/adminProfilePhoto"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_user_placeholder"
+            app:shapeAppearanceOverlay="@style/CircleImageView"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/adminProfilePhoto"
+            android:orientation="vertical"
+            android:paddingStart="16dp">
+
+            <TextView
+                android:id="@+id/adminUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Admin Username"
+                android:textColor="@android:color/white"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/adminUserID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Admin ID: 123"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/adminLogoutButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="19dp"
+            android:background="@android:color/transparent"
+            android:text="Logout"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <!-- Tab Layout -->
+
+    <!-- View for Tabs -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/adminTabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabTextColor="@color/grayBtn"
+        app:tabSelectedTextColor="@color/mainBlue"
+        app:tabIndicatorColor="@color/grayBtn"/>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/adminViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>
