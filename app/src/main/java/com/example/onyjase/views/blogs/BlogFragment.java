@@ -20,6 +20,7 @@ import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentBlogBinding;
 import com.example.onyjase.models.Blog;
 import com.example.onyjase.models.Notification;
+import com.example.onyjase.models.User;
 import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.firebase.firestore.CollectionReference;
@@ -342,6 +343,12 @@ public class BlogFragment extends Fragment {
                                             if (task2.isSuccessful()) {
                                                 // toggle follow button icon
                                                 binding.followButton.setImageResource(R.drawable.follow_button);
+
+                                                // remove following from view model follow list
+                                                userFollowings.remove(blogUserID);
+                                                User currentUser = viewModel.getUser().getValue();
+                                                User updatedUser = new User(currentUser.getUserID(), currentUser.getUsername(), currentUser.getEmail(), currentUser.getRole(), currentUser.getImageURL(), userFollowings, currentUser.getFavorites());
+                                                viewModel.setUser(updatedUser);
                                             } else {
                                                 Toast.makeText(requireContext(), "Error updating followings.", Toast.LENGTH_SHORT).show();
                                             }
@@ -355,6 +362,15 @@ public class BlogFragment extends Fragment {
 
                                                 // save follow notification to database
                                                 addFollowNotification(blogUserID, currentUserId);
+
+                                                // add new following to view model follow list
+                                                if (userFollowings != null) {
+                                                    userFollowings.add(blogUserID);
+                                                    User currentUser = viewModel.getUser().getValue();
+                                                    User updatedUser = new User(currentUser.getUserID(), currentUser.getUsername(), currentUser.getEmail(), currentUser.getRole(), currentUser.getImageURL(), userFollowings, currentUser.getFavorites());
+                                                    viewModel.setUser(updatedUser);
+                                                }
+
                                             } else {
                                                 Toast.makeText(requireContext(), "Error updating followings.", Toast.LENGTH_SHORT).show();
                                             }
