@@ -64,6 +64,7 @@ public class EditFragment extends Fragment {
             binding.title.setText(currentBlog.getTitle());
             binding.content.setText(currentBlog.getContent());
             setBlogCoverImage(currentBlog.getImageURL());
+            viewModel.setCurrentBlogID(currentBlog.getBlogID());
         }
 
         binding.selectImgBtn.setOnClickListener(v -> pickImage());

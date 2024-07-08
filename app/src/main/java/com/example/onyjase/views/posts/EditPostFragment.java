@@ -93,6 +93,9 @@ public class EditPostFragment extends Fragment {
 
             // set post cover image
             setPostCoverImage(currentPost.getImageURL());
+
+            // set view model current post id
+            viewModel.setCurrentPostID(currentPost.getPostID());
         }
 
         // =============================================== Buttons listeners ===============================================
