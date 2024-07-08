@@ -17,7 +17,13 @@ import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.BlogFragment;
 import com.example.onyjase.views.blogs.EditFragment;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -113,12 +119,70 @@ public class MyBlogsAdapter extends RecyclerView.Adapter<MyBlogsAdapter.BlogView
     }
 
     private void deleteBlogFromDb(String blogID) {
-        firestore.collection("blogs").document(blogID).delete()
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(context, "Blog deleted successfully", Toast.LENGTH_SHORT).show();
-                    loadUserPosts(viewModel.getUser().getValue().getUserID()); // Reload user posts
-                })
-                .addOnFailureListener(e -> Toast.makeText(context, "Error deleting blog", Toast.LENGTH_SHORT).show());
+        // delete all comments of this blog
+        deleteAllBlogComments(blogID);
+
+        // delete blog cover image
+        deleteBlogImages(blogID);
+
+        // delete this blog from other user's favorites
+        DocumentReference docRef = firestore.collection("blogs").document(blogID);
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    // get list of all user ids of users that liked this blog
+                    List<String> likedBy = (List<String>) document.get("likedBy");
+                    for (String id : likedBy) { // for each user id, delete blogID from their favorites
+                        firestore.collection("users").document(id)
+                                .update("favorites", FieldValue.arrayRemove(blogID)).addOnCompleteListener(task2 -> {
+                                    if (task2.isSuccessful()) {
+                                        // do nothing
+                                    } else {
+                                        Toast.makeText(context, "Error updating favorites.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+
+                    // delete the blog from db
+                    docRef.delete()
+                            .addOnSuccessListener(unused -> {
+                                Toast.makeText(context, "Blog deleted.", Toast.LENGTH_SHORT).show();
+                                loadUserPosts(viewModel.getUser().getValue().getUserID()); // Reload user posts
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(context, "Error deleting blog.", Toast.LENGTH_SHORT).show());
+                }
+            }
+        });
+    }
+
+    // delete all comments of blog
+    private void deleteAllBlogComments(String blogID) {
+        CollectionReference colRef = firestore.collection("comments");
+        Query query = colRef.whereEqualTo("blogID", blogID);
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // delete all comments of this blog
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String commentID = document.getString("commentID");
+                    colRef.document(commentID).delete();
+                }
+            } else {
+                Toast.makeText(context, "Error deleting comments.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // delete images of this blog
+    private void deleteBlogImages(String blogID) {
+        String blogImgUrl = "blogs/" + blogID;
+        StorageReference listRef = storage.getReference().child(blogImgUrl);
+        listRef.listAll()
+                .addOnSuccessListener(listResult -> {
+                    for (StorageReference item : listResult.getItems()){
+                        item.delete();
+                    }
+                }).addOnFailureListener(e -> Toast.makeText(context, "Error deleting blog images.", Toast.LENGTH_SHORT).show());
     }
 
     private void loadUserPosts(String userId) {
