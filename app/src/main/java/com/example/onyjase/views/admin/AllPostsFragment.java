@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +24,8 @@ import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.posts.EditPostFragment;
 import com.example.onyjase.views.posts.PostFragment;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
@@ -32,6 +35,7 @@ public class AllPostsFragment extends Fragment {
     private AllPostsAdapter adapter;
     private AppViewModel viewModel;
     private FirebaseFirestore db;
+    private FirebaseStorage storage;
 
     @Nullable
     @Override
@@ -45,6 +49,7 @@ public class AllPostsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         adapter = new AllPostsAdapter(getActivity(), new AllPostsAdapter.OnPostInteractionListener() {
@@ -103,6 +108,17 @@ public class AllPostsFragment extends Fragment {
     }
 
     private void deletePostFromDb(String postID) {
+        // delete post cover image from storage
+        String postImgUrl = "posts/" + postID;
+        StorageReference listRef = storage.getReference().child(postImgUrl);
+        listRef.listAll()
+                .addOnSuccessListener(listResult -> {
+                    for (StorageReference item : listResult.getItems()){
+                        item.delete();
+                    }
+                }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting post images.", Toast.LENGTH_SHORT).show());
+
+        // delete post from db
         db.collection("posts").document(postID).delete()
                 .addOnSuccessListener(aVoid -> {
                     loadAllPosts(); // Reload posts after deletion
