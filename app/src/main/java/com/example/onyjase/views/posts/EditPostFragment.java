@@ -36,6 +36,7 @@ public class EditPostFragment extends Fragment {
 
     // selecting image
     Uri curImage;
+    boolean imageChanged;
 
     // firebase firestore
     FirebaseFirestore db;
@@ -66,6 +67,7 @@ public class EditPostFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
+        imageChanged = false;
 
         // load initial data
         Post currentPost = viewModel.getCurrentPost().getValue();
@@ -143,6 +145,7 @@ public class EditPostFragment extends Fragment {
                     if (data != null) {
                         binding.selectedImg.setImageURI(data.getData());
                         curImage = data.getData();
+                        imageChanged = true;
                     }
                 }
             }
@@ -173,20 +176,28 @@ public class EditPostFragment extends Fragment {
         // new updated post
         Post newPost = new Post(postID, userID, title, content, tag, imageURL);
 
-        // save image to storage
-        StorageReference imageRef = storage.getReference().child(imageURL);
-        imageRef.putFile(curImage).addOnSuccessListener(taskSnapshot -> {
-            // save post to database
-            db.collection("posts")
-                    .document(postID)
-                    .set(newPost)
-                    .addOnSuccessListener(unused -> {
+        // save post to database
+        db.collection("posts")
+                .document(postID)
+                .set(newPost)
+                .addOnSuccessListener(unused -> {
+                    // save image to storage if image changed
+                    if (imageChanged) {
+                        StorageReference imageRef = storage.getReference().child(imageURL);
+                        imageRef.putFile(curImage).addOnSuccessListener(taskSnapshot -> {
+                            // toast success message
+                            Toast.makeText(requireContext(), "Admin post updated.", Toast.LENGTH_SHORT).show();
+
+                            // back to post page
+                            FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment());
+                        }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating image", Toast.LENGTH_SHORT).show());
+                    } else {
                         // toast success message
                         Toast.makeText(requireContext(), "Admin post updated.", Toast.LENGTH_SHORT).show();
 
                         // back to post page
                         FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment());
-                    }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating admin post", Toast.LENGTH_SHORT).show());
-        }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating admin post", Toast.LENGTH_SHORT).show());
+                    }
+                }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating admin post", Toast.LENGTH_SHORT).show());
     }
 }

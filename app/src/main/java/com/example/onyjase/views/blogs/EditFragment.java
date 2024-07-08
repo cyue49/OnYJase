@@ -42,6 +42,7 @@ public class EditFragment extends Fragment {
     private FirebaseFirestore db;
     private FirebaseStorage storage;
     private Uri curImageUri;
+    private boolean imageChanged;
 
     @Nullable
     @Override
@@ -57,6 +58,7 @@ public class EditFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
+        imageChanged = false;
 
         // Load initial data
         Blog currentBlog = viewModel.getCurrentBlog().getValue();
@@ -114,13 +116,20 @@ public class EditFragment extends Fragment {
 
                         Blog updatedBlog = new Blog(blogID, userID, title, content, imageURL, likesCount, likedBy);
 
-                        StorageReference imageRef = storage.getReference().child(imageURL);
-                        imageRef.putFile(curImageUri).addOnSuccessListener(taskSnapshot -> {
-                            db.collection("blogs").document(blogID).set(updatedBlog).addOnSuccessListener(aVoid -> {
+                        // update blog in db
+                        db.collection("blogs").document(blogID).set(updatedBlog).addOnSuccessListener(aVoid -> {
+                            // update cover image in db if changed
+                            if (imageChanged) {
+                                StorageReference imageRef = storage.getReference().child(imageURL);
+                                imageRef.putFile(curImageUri).addOnSuccessListener(taskSnapshot -> {
+                                    Toast.makeText(requireContext(), "Blog updated successfully", Toast.LENGTH_SHORT).show();
+                                    FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
+                                }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error uploading image.", Toast.LENGTH_SHORT).show());
+                            } else {
                                 Toast.makeText(requireContext(), "Blog updated successfully", Toast.LENGTH_SHORT).show();
                                 FragmentTransactionHelper.loadFragment(requireContext(), new BlogFragment());
-                            }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating blog.", Toast.LENGTH_SHORT).show());
-                        }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error uploading image.", Toast.LENGTH_SHORT).show());
+                            }
+                        }).addOnFailureListener(e -> Toast.makeText(requireContext(), "Error updating blog.", Toast.LENGTH_SHORT).show());
                     }
                 }
             });
@@ -141,6 +150,7 @@ public class EditFragment extends Fragment {
                     if (data != null) {
                         curImageUri = data.getData();
                         binding.selectedImg.setImageURI(curImageUri);
+                        imageChanged = true;
                     }
                 }
             }
