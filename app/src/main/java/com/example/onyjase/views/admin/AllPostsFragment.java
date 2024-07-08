@@ -1,5 +1,6 @@
 package com.example.onyjase.views.admin;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +18,9 @@ import com.example.onyjase.R;
 import com.example.onyjase.adapters.AllPostsAdapter;
 import com.example.onyjase.databinding.FragmentAllPostsBinding;
 import com.example.onyjase.models.Post;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.example.onyjase.views.posts.EditPostFragment;
 import com.example.onyjase.views.posts.PostFragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -48,19 +51,22 @@ public class AllPostsFragment extends Fragment {
             @Override
             public void onPostClick(Post post) {
                 viewModel.setCurrentPost(post);
-                loadFragment(new PostFragment());
+                viewModel.setCurrentPostID(post.getPostID());
+                FragmentTransactionHelper.loadFragment(requireContext(), new PostFragment());
             }
 
             @Override
             public void onEditClick(Post post) {
-                // Handle edit post
+                viewModel.setCurrentPost(post);
+                FragmentTransactionHelper.loadFragment(requireContext(), new EditPostFragment());
             }
 
             @Override
             public void onDeleteClick(Post post) {
-                // Handle delete post
+                showDeleteConfirmationDialog(post);
             }
         });
+
 
         binding.recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         binding.recyclerView.setAdapter(adapter);
@@ -84,6 +90,27 @@ public class AllPostsFragment extends Fragment {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.container, fragment);
         transaction.commit();
+    }
+
+    private void showDeleteConfirmationDialog(Post post) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(requireContext());
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.delete_blog_dialog, null);
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.setPositiveButton("Delete", (dialog, which) -> deletePostFromDb(post.getPostID()))
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        dialogBuilder.create().show();
+    }
+
+    private void deletePostFromDb(String postID) {
+        db.collection("posts").document(postID).delete()
+                .addOnSuccessListener(aVoid -> {
+                    loadAllPosts(); // Reload posts after deletion
+                    // Show success message
+                })
+                .addOnFailureListener(e -> {
+                    // Handle error
+                });
     }
 
     @Override

@@ -23,7 +23,9 @@
             android:layout_marginStart="16dp"
             android:layout_alignParentStart="true"
             android:src="@drawable/ic_user_placeholder"
-            app:shapeAppearanceOverlay="@style/CircleImageView"/>
+            app:shapeAppearanceOverlay="@style/CircleImageView"
+            app:strokeWidth="1dp"
+            app:strokeColor="@android:color/white"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -33,37 +35,43 @@
             android:orientation="vertical"
             android:paddingStart="16dp">
 
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/editUsername"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Username"
+                    android:textColor="@android:color/white"
+                    android:textSize="25sp"
+                    android:textStyle="bold"
+                    android:background="@android:color/transparent"
+                    android:hint="Enter Username"
+                    android:enabled="false"
+                    android:paddingEnd="40dp"/>
+
+                <ImageView
+                    android:id="@+id/editUsernameButton"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignBottom="@+id/editUsername"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="76dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Edit Username"
+                    android:src="@drawable/baseline_edit_24" />
+            </RelativeLayout>
+
             <TextView
-                android:id="@+id/username"
+                android:id="@+id/userEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Username"
+                android:text="User Email"
                 android:textColor="@android:color/white"
-                android:textSize="25sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/labelUserID"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="User ID:"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
-                    android:layout_marginEnd="4dp"/>
-
-                <TextView
-                    android:id="@+id/userID"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="123"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp" />
-            </LinearLayout>
+                android:textSize="14sp" />
         </LinearLayout>
 
         <Button
@@ -78,9 +86,20 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <!-- Tab Layout -->
+    <!-- Save Button -->
+    <Button
+        android:id="@+id/saveProfileButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal"
+        android:backgroundTint="@color/mainBlue"
+        android:text="Save"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
-    <!-- View for Tabs -->
+    <!-- Tab Layout -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"

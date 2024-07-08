@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 
-import com.example.onyjase.R;
 import com.example.onyjase.adapters.MyBlogsAdapter;
 import com.example.onyjase.databinding.FragmentMyPostsBinding;
 import com.example.onyjase.models.Blog;
@@ -41,11 +40,7 @@ public class MyBlogsFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
-        adapter = new MyBlogsAdapter(
-                viewModel,
-                getActivity()
-        );
-
+        adapter = new MyBlogsAdapter(viewModel, getActivity());
         binding.recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         binding.recyclerView.setAdapter(adapter);
 

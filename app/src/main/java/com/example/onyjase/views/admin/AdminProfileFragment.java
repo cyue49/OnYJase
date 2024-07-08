@@ -45,7 +45,6 @@ public class AdminProfileFragment extends Fragment {
         viewModel.getUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 binding.adminUsername.setText(user.getUsername());
-                binding.adminUserID.setText("Admin ID: " + user.getUserID());
                 if (user.getImageURL() != null && !user.getImageURL().isEmpty()) {
                     Glide.with(requireContext())
                             .load(user.getImageURL())

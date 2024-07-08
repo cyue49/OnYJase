@@ -2,6 +2,7 @@ package com.example.onyjase.adapters;
 
 import android.app.Activity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import androidx.annotation.NonNull;
@@ -24,10 +25,15 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.UserVi
     private AppViewModel viewModel;
     private Activity context;
     private FirebaseFirestore firestore;
+    private final OnUserInteractionListener listener;
 
-    public AllUsersAdapter(AppViewModel viewModel, Activity context) {
-        this.viewModel = viewModel;
+    public interface OnUserInteractionListener {
+        void onDeleteClick(User user);
+    }
+
+    public AllUsersAdapter(FragmentActivity context, OnUserInteractionListener listener) {
         this.context = context;
+        this.listener = listener;
         this.users = List.of(); // Initialize with an empty list
         this.firestore = FirebaseFirestore.getInstance();
     }
@@ -67,18 +73,13 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.UserVi
         // Set up more options button
         holder.binding.moreOptionsButton.setOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(context, holder.binding.moreOptionsButton);
-            popupMenu.inflate(R.menu.popup_menu); // Make sure to have this menu resource
+            popupMenu.inflate(R.menu.popup_menu_delete_only); // Ensure this menu resource only has the delete option
             popupMenu.setOnMenuItemClickListener(menuItem -> {
-                switch (menuItem.getItemId()) {
-                    case R.id.action_edit:
-                        // Handle edit option
-                        return true;
-                    case R.id.action_delete:
-                        // Handle delete option
-                        return true;
-                    default:
-                        return false;
+                if (menuItem.getItemId() == R.id.action_delete) {
+                    listener.onDeleteClick(user);
+                    return true;
                 }
+                return false;
             });
             popupMenu.show();
         });
