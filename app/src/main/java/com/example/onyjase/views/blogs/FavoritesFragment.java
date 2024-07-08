@@ -19,6 +19,7 @@ import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class FavoritesFragment extends Fragment {
@@ -75,6 +76,7 @@ public class FavoritesFragment extends Fragment {
                         favoriteBlogs.add(blog);
                     }
                     if (favoriteBlogs.size() == blogIds.size()) {
+                        sortBlogsByDate(favoriteBlogs);
                         blogAdapter.setBlogs(favoriteBlogs);
                     }
                 } else {
@@ -88,5 +90,16 @@ public class FavoritesFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    // sort list of blog by timestamp, with the latest first
+    private void sortBlogsByDate(List<Blog> blogs) {
+        blogs.sort(new Comparator<Blog>() {
+            @Override
+            public int compare(Blog o1, Blog o2) {
+                if (o1.getTimestamp().equals(o2.getTimestamp())) return 0;
+                return o1.getTimestamp().compareTo(o2.getTimestamp()) * -1;
+            }
+        });
     }
 }

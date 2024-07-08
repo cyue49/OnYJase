@@ -223,9 +223,9 @@ public class CommentsFragment extends Fragment {
 
                             Comment comment = new Comment(commentID, userID, blogId, content, stickerURL, timestamp);
                             comments.add(comment);
-                            sortCommentsByDate(comments, true);
                             count++;
                         }
+                        sortCommentsByDate(comments, true);
                         adapter.reload();
                         binding.commentsCount.setText(String.valueOf(count));
                     } else {
