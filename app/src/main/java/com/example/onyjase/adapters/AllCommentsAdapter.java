@@ -18,7 +18,6 @@ import com.example.onyjase.viewmodels.AppViewModel;
 import com.example.onyjase.views.blogs.CommentsFragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-
 import java.util.List;
 
 public class AllCommentsAdapter extends RecyclerView.Adapter<AllCommentsAdapter.CommentViewHolder> {
@@ -27,18 +26,18 @@ public class AllCommentsAdapter extends RecyclerView.Adapter<AllCommentsAdapter.
     private AppViewModel viewModel;
     private Activity context;
     private FirebaseFirestore firestore;
-
-    public AllCommentsAdapter(AppViewModel viewModel, Activity context) {
-        this.viewModel = viewModel;
-        this.context = context;
-        this.comments = List.of(); // Initialize with an empty list
-        this.firestore = FirebaseFirestore.getInstance();
-    }
+    private final OnCommentInteractionListener listener;
 
     public interface OnCommentInteractionListener {
         void onCommentClick(Comment comment);
-        void onEditClick(Comment comment);
         void onDeleteClick(Comment comment);
+    }
+
+    public AllCommentsAdapter(FragmentActivity context, OnCommentInteractionListener listener) {
+        this.context = context;
+        this.listener = listener;
+        this.comments = List.of(); // Initialize with an empty list
+        this.firestore = FirebaseFirestore.getInstance();
     }
 
     public static class CommentViewHolder extends RecyclerView.ViewHolder {
@@ -82,26 +81,20 @@ public class AllCommentsAdapter extends RecyclerView.Adapter<AllCommentsAdapter.
 
         // Set click listeners to navigate to CommentFragment
         View.OnClickListener listener = v -> {
-            viewModel.setCurrentComment(comment);
-            loadFragment(new CommentsFragment());
+            this.listener.onCommentClick(comment);
         };
         holder.binding.commentContent.setOnClickListener(listener);
 
         // Set up more options button
         holder.binding.moreOptionsButton.setOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(context, holder.binding.moreOptionsButton);
-            popupMenu.inflate(R.menu.popup_menu); // Make sure to have this menu resource
+            popupMenu.inflate(R.menu.popup_menu_delete_only); // Ensure this menu resource only has the delete option
             popupMenu.setOnMenuItemClickListener(menuItem -> {
-                switch (menuItem.getItemId()) {
-                    case R.id.action_edit:
-                        // Handle edit option
-                        return true;
-                    case R.id.action_delete:
-                        // Handle delete option
-                        return true;
-                    default:
-                        return false;
+                if (menuItem.getItemId() == R.id.action_delete) {
+                    this.listener.onDeleteClick(comment);
+                    return true;
                 }
+                return false;
             });
             popupMenu.show();
         });

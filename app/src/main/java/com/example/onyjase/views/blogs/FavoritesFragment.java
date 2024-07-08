@@ -1,6 +1,7 @@
 package com.example.onyjase.views.blogs;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.example.onyjase.adapters.BlogAdapter;
-import com.example.onyjase.databinding.FragmentExploreBinding;
+import com.example.onyjase.databinding.FragmentFavoritesBinding;
 import com.example.onyjase.models.Blog;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -21,14 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FavoritesFragment extends Fragment {
-    private FragmentExploreBinding binding; // Reusing the same layout for simplicity
+    private FragmentFavoritesBinding binding;
     private BlogAdapter blogAdapter;
     private AppViewModel viewModel;
     private FirebaseFirestore db;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentExploreBinding.inflate(inflater, container, false);
+        binding = FragmentFavoritesBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -48,12 +49,18 @@ public class FavoritesFragment extends Fragment {
 
     private void loadFavoriteBlogs() {
         String userId = viewModel.getUser().getValue().getUserID();
+        Log.d("FavoritesFragment", "Loading favorites for user: " + userId);
         db.collection("users").document(userId).get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 List<String> favoriteBlogIds = (List<String>) task.getResult().get("favorites");
                 if (favoriteBlogIds != null && !favoriteBlogIds.isEmpty()) {
+                    Log.d("FavoritesFragment", "Favorite blog IDs: " + favoriteBlogIds);
                     fetchFavoriteBlogs(favoriteBlogIds);
+                } else {
+                    Log.d("FavoritesFragment", "No favorite blogs found.");
                 }
+            } else {
+                Log.e("FavoritesFragment", "Error fetching favorite blogs", task.getException());
             }
         });
     }
@@ -70,6 +77,8 @@ public class FavoritesFragment extends Fragment {
                     if (favoriteBlogs.size() == blogIds.size()) {
                         blogAdapter.setBlogs(favoriteBlogs);
                     }
+                } else {
+                    Log.e("FavoritesFragment", "Error fetching blog with ID: " + blogId, task.getException());
                 }
             });
         }
