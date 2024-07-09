@@ -72,6 +72,19 @@
                 android:text="User Email"
                 android:textColor="@android:color/white"
                 android:textSize="14sp" />
+
+            <!-- Save Button -->
+            <Button
+                android:id="@+id/saveProfileButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="@color/mainBlue"
+                android:text="Save"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <Button
@@ -85,19 +98,6 @@
             android:textColor="@android:color/white"
             android:textStyle="bold" />
     </RelativeLayout>
-
-    <!-- Save Button -->
-    <Button
-        android:id="@+id/saveProfileButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_gravity="center_horizontal"
-        android:backgroundTint="@color/mainBlue"
-        android:text="Save"
-        android:textColor="@android:color/white"
-        android:textStyle="bold"
-        android:visibility="gone" />
 
     <!-- Tab Layout -->
     <com.google.android.material.tabs.TabLayout
