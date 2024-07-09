@@ -45,11 +45,10 @@ public class AllCommentsFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
-        adapter = new AllCommentsAdapter(getActivity(), new AllCommentsAdapter.OnCommentInteractionListener() {
+        adapter = new AllCommentsAdapter(getActivity(), viewModel, new AllCommentsAdapter.OnCommentInteractionListener() {
             @Override
             public void onCommentClick(Comment comment) {
                 viewModel.setCurrentComment(comment);
-                // You can define an action here if necessary, or navigate to a different fragment
             }
 
             @Override
@@ -72,6 +71,7 @@ public class AllCommentsFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     // Handle error
+                    Toast.makeText(requireContext(), "Failed to load comments. Please try again.", Toast.LENGTH_SHORT).show();
                 });
     }
 

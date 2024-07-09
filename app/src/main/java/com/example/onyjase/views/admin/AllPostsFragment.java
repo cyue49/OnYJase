@@ -87,6 +87,7 @@ public class AllPostsFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     // Handle error
+                    Toast.makeText(requireContext(), "Failed to load posts. Please try again.", Toast.LENGTH_SHORT).show();
                 });
     }
 

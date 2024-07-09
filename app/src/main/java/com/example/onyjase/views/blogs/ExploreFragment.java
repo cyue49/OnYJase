@@ -4,10 +4,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.onyjase.R;
@@ -32,7 +35,7 @@ public class ExploreFragment extends Fragment {
 
         // Initialize RecyclerView
         recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
         // Initialize ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
@@ -58,6 +61,7 @@ public class ExploreFragment extends Fragment {
                         blogAdapter.setBlogs(blogs);
                     } else {
                         // Handle the error
+                        Toast.makeText(requireContext(), "Failed to load blogs. Please try again.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

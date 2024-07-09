@@ -9,11 +9,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.onyjase.R;
 import com.example.onyjase.adapters.MyCommentsAdapter;
 import com.example.onyjase.databinding.FragmentMyCommentsBinding;
 import com.example.onyjase.models.Comment;
