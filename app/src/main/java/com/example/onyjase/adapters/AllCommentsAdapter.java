@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -13,9 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.ItemAllCommentBinding;
+import com.example.onyjase.models.Blog;
 import com.example.onyjase.models.Comment;
 import com.example.onyjase.viewmodels.AppViewModel;
-import com.example.onyjase.views.blogs.CommentsFragment;
+import com.example.onyjase.views.blogs.BlogFragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
@@ -33,8 +36,9 @@ public class AllCommentsAdapter extends RecyclerView.Adapter<AllCommentsAdapter.
         void onDeleteClick(Comment comment);
     }
 
-    public AllCommentsAdapter(FragmentActivity context, OnCommentInteractionListener listener) {
+    public AllCommentsAdapter(FragmentActivity context, AppViewModel viewModel, OnCommentInteractionListener listener) {
         this.context = context;
+        this.viewModel = viewModel;
         this.listener = listener;
         this.comments = List.of(); // Initialize with an empty list
         this.firestore = FirebaseFirestore.getInstance();
@@ -79,11 +83,8 @@ public class AllCommentsAdapter extends RecyclerView.Adapter<AllCommentsAdapter.
             holder.binding.commentUsername.setText("Unknown");
         }
 
-        // Set click listeners to navigate to CommentFragment
-        View.OnClickListener listener = v -> {
-            this.listener.onCommentClick(comment);
-        };
-        holder.binding.commentContent.setOnClickListener(listener);
+        // Set click listeners to navigate to the original blog
+        holder.binding.getRoot().setOnClickListener(v -> navigateToBlog(comment.getBlogID()));
 
         // Set up more options button
         holder.binding.moreOptionsButton.setOnClickListener(view -> {
@@ -91,7 +92,7 @@ public class AllCommentsAdapter extends RecyclerView.Adapter<AllCommentsAdapter.
             popupMenu.inflate(R.menu.popup_menu_delete_only); // Ensure this menu resource only has the delete option
             popupMenu.setOnMenuItemClickListener(menuItem -> {
                 if (menuItem.getItemId() == R.id.action_delete) {
-                    this.listener.onDeleteClick(comment);
+                    listener.onDeleteClick(comment);
                     return true;
                 }
                 return false;
@@ -108,6 +109,23 @@ public class AllCommentsAdapter extends RecyclerView.Adapter<AllCommentsAdapter.
     public void setComments(List<Comment> comments) {
         this.comments = comments;
         notifyDataSetChanged();
+    }
+
+    private void navigateToBlog(String blogID) {
+        firestore.collection("blogs").document(blogID).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Blog blog = documentSnapshot.toObject(Blog.class);
+                        if (blog != null) {
+                            viewModel.setCurrentBlogID(blogID);
+                            viewModel.setCurrentBlog(blog);
+                            loadFragment(new BlogFragment());
+                        }
+                    } else {
+                        Toast.makeText(context, "Blog not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(context, "Error fetching blog", Toast.LENGTH_SHORT).show());
     }
 
     private void loadFragment(Fragment fragment) {

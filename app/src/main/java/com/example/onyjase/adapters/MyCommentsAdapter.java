@@ -3,10 +3,8 @@ package com.example.onyjase.adapters;
 // adapter for list of user comments in profile page
 import android.app.Activity;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -15,8 +13,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.ItemMyCommentBinding;
+import com.example.onyjase.models.Blog;
 import com.example.onyjase.models.Comment;
+import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
+import com.example.onyjase.views.blogs.BlogFragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
@@ -25,9 +26,9 @@ import java.util.List;
 public class MyCommentsAdapter extends RecyclerView.Adapter<MyCommentsAdapter.CommentViewHolder> {
 
     private List<Comment> comments;
-    private Activity context;
-    private FirebaseFirestore firestore;
-    private AppViewModel viewModel;
+    private final Activity context;
+    private final FirebaseFirestore firestore;
+    private final AppViewModel viewModel;
 
     public MyCommentsAdapter(AppViewModel viewModel, Activity context) {
         this.viewModel = viewModel;
@@ -62,7 +63,7 @@ public class MyCommentsAdapter extends RecyclerView.Adapter<MyCommentsAdapter.Co
 
         holder.binding.moreOptionsButton.setOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(context, holder.binding.moreOptionsButton);
-            popupMenu.inflate(R.menu.popup_menu); // Make sure to have this menu resource
+            popupMenu.inflate(R.menu.popup_menu); // Ensure this menu resource exists
             popupMenu.setOnMenuItemClickListener(menuItem -> {
                 switch (menuItem.getItemId()) {
                     case R.id.action_edit:
@@ -77,6 +78,9 @@ public class MyCommentsAdapter extends RecyclerView.Adapter<MyCommentsAdapter.Co
             });
             popupMenu.show();
         });
+
+        // Set click listener to navigate to the original blog
+        holder.binding.getRoot().setOnClickListener(v -> navigateToBlog(comment.getBlogID()));
     }
 
     @Override
@@ -130,5 +134,22 @@ public class MyCommentsAdapter extends RecyclerView.Adapter<MyCommentsAdapter.Co
         dialogBuilder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         AlertDialog alertDialog = dialogBuilder.create();
         alertDialog.show();
+    }
+
+    private void navigateToBlog(String blogID) {
+        firestore.collection("blogs").document(blogID).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Blog blog = documentSnapshot.toObject(Blog.class);
+                        if (blog != null) {
+                            viewModel.setCurrentBlogID(blogID);
+                            viewModel.setCurrentBlog(blog);
+                            FragmentTransactionHelper.loadFragment(context, new BlogFragment());
+                        }
+                    } else {
+                        Toast.makeText(context, "Blog not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(context, "Error fetching blog", Toast.LENGTH_SHORT).show());
     }
 }

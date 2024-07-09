@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -60,7 +61,7 @@ public class PostsCategoryFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 1));
 
         adapter = new PostAdapter(viewModel, requireActivity());
         recyclerView.setAdapter(adapter);
@@ -77,6 +78,7 @@ public class PostsCategoryFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     // Handle error
+                    Toast.makeText(requireContext(), "Failed to load posts. Please try again.", Toast.LENGTH_SHORT).show();
                 });
     }
 

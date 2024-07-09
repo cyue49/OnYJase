@@ -2,7 +2,6 @@ package com.example.onyjase.adapters;
 
 import android.app.Activity;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import androidx.annotation.NonNull;
@@ -65,6 +64,7 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.UserVi
             Glide.with(context)
                     .load(user.getImageURL())
                     .placeholder(R.drawable.ic_user_placeholder)
+                    .circleCrop()
                     .into(holder.binding.userProfilePhoto);
         } else {
             holder.binding.userProfilePhoto.setImageResource(R.drawable.ic_user_placeholder);

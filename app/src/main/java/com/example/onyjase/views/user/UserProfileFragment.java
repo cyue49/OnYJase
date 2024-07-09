@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,6 +21,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.bumptech.glide.Glide;
 import com.example.onyjase.R;
 import com.example.onyjase.databinding.FragmentUserProfileBinding;
+import com.example.onyjase.models.User;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -62,7 +64,7 @@ public class UserProfileFragment extends Fragment {
                     Glide.with(requireContext())
                             .load(user.getImageURL())
                             .placeholder(R.drawable.ic_user_placeholder)
-                            .circleCrop() // Ensure the image is cropped into a circle
+                            .circleCrop()
                             .into(binding.profilePhoto);
                 }
             }
@@ -140,6 +142,7 @@ public class UserProfileFragment extends Fragment {
             });
         }).addOnFailureListener(e -> {
             // Handle failure
+            Toast.makeText(requireContext(), "Failed to update upload profile photo. Please try again.", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -151,9 +154,15 @@ public class UserProfileFragment extends Fragment {
                 .update("username", newUsername)
                 .addOnSuccessListener(aVoid -> {
                     // Update successful
+                    User updatedUser = viewModel.getUser().getValue();
+                    if (updatedUser != null) {
+                        updatedUser.setUsername(newUsername);
+                        viewModel.setUser(updatedUser);
+                    }
                 })
                 .addOnFailureListener(e -> {
                     // Handle failure
+                    Toast.makeText(requireContext(), "Failed to update username. Please try again.", Toast.LENGTH_SHORT).show();
                 });
     }
 

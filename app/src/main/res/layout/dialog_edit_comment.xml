@@ -22,12 +22,4 @@
         android:hint="Edit your comment"
         android:background="?android:attr/editTextBackground"
         android:padding="8dp"/>
-
-    <Button
-        android:id="@+id/saveButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="@color/subBlue"/>
 </LinearLayout>

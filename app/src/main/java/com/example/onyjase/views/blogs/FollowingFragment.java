@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.onyjase.adapters.BlogAdapter;
 import com.example.onyjase.databinding.FragmentFollowingBinding;
@@ -42,7 +43,7 @@ public class FollowingFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
 
         adapter = new BlogAdapter(viewModel, getActivity());
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         binding.recyclerView.setAdapter(adapter);
 
         loadFollowingBlogs();

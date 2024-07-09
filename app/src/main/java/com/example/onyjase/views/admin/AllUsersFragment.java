@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,7 +19,6 @@ import com.example.onyjase.R;
 import com.example.onyjase.adapters.AllUsersAdapter;
 import com.example.onyjase.databinding.FragmentAllUsersBinding;
 import com.example.onyjase.models.User;
-import com.example.onyjase.utils.FragmentTransactionHelper;
 import com.example.onyjase.viewmodels.AppViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -61,6 +61,7 @@ public class AllUsersFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     // Handle error
+                    Toast.makeText(requireContext(), "Failed to load users. Please try again.", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -82,14 +83,8 @@ public class AllUsersFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     // Handle error
+                    Toast.makeText(requireContext(), "Failed to delete user. Please try again.", Toast.LENGTH_SHORT).show();
                 });
-    }
-
-    private void loadFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
     }
 
     @Override
