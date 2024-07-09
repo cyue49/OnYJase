@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -89,10 +90,9 @@ public class AllCommentsFragment extends Fragment {
                 .addOnSuccessListener(aVoid -> {
                     loadAllComments(); // Reload comments after deletion
                     // Show success message
+                    Toast.makeText(requireContext(), "Comment deleted.", Toast.LENGTH_SHORT).show();
                 })
-                .addOnFailureListener(e -> {
-                    // Handle error
-                });
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting comment.", Toast.LENGTH_SHORT).show());
     }
 
     private void loadFragment(Fragment fragment) {

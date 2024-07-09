@@ -95,10 +95,18 @@ public class NotificationsFragment extends Fragment {
                 db.collection("notifications").document(notifID)
                         .set(notification);
             }
+            for (Notification notification : oldNotifications) {
+                notification.setShow(false);
+                String notifID = notification.getNotificationID();
+                db.collection("notifications").document(notifID)
+                        .set(notification);
+            }
 
             // clear list for adapter
             newNotifications.clear();
+            oldNotifications.clear();
             newNotificationsAdapter.reload();
+            oldNotificationsAdapter.reload();
         });
 
         // refresh notifications button

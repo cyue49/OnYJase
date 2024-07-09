@@ -123,10 +123,9 @@ public class AllPostsFragment extends Fragment {
                 .addOnSuccessListener(aVoid -> {
                     loadAllPosts(); // Reload posts after deletion
                     // Show success message
+                    Toast.makeText(requireContext(), "Post deleted.", Toast.LENGTH_SHORT).show();
                 })
-                .addOnFailureListener(e -> {
-                    // Handle error
-                });
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error deleting post.", Toast.LENGTH_SHORT).show());
     }
 
     @Override
